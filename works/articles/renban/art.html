@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight,ぐろーらいと, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>ファイル名を連番にしてくれるスクリプトをつくろう!</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../study.html">科学アカデミー</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">宗教</a>
+	<a href="../../labnote.html">実験ノート</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>ファイル名を連番にしてくれるスクリプトをつくろう!</h1>
+  <span class="date">2018.03.14</span>
+
+<p>土曜日, 10. 3月 2018 08:39午後 更新</p>
+<p><em>よりシンプルなスクリプトができたので, この記事を大幅に更新しました</em></p>
+<p>画像の整理などをしていて,画像ファイル名を連番にしたいと思ったことは無いだろうか. 例えば，000.jpg, 001.jpg, 002.jpgというようにだ．windowsではそういうことをしてくれるソフトがあったが，linuxではなかった．</p>
+<p>私が見つけられなかっただけかも知れないが．ならばシェルスクリプトを利用して自作してしまおう!せっかくlinuxを使っているんだ．UNIXコマンドとシェルスクリプトを利用すれば，わざわざプログラミングをしなくても意外と簡単にできてしまうのだ．</p>
+<h2 id="方針">方針</h2>
+<ul>
+<li>ファイル名を取得する,</li>
+<li>拡張子の部分を抜き取る,</li>
+<li>接頭,末尾を設定できるようにする,</li>
+</ul>
+<p>というわけで，早速ソースコードを見てみよう!</p>
+<h2 id="プログラム">プログラム</h2>
+<h3 id="スクリプト">スクリプト</h3>
+<p><em>renban.sh</em></p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+
+<span class="ot">cnt=</span>0
+<span class="ot">extension=${1}</span>
+
+<span class="kw">if [</span> <span class="ot">$#</span> <span class="ot">-eq</span> 0<span class="kw"> ]</span>;
+<span class="kw">then</span>
+    <span class="kw">echo</span> <span class="st">&quot;拡張子を入力して下さい&quot;</span> <span class="kw">&gt;&amp;2</span>
+    <span class="kw">exit</span> 1
+<span class="kw">fi</span>
+
+<span class="kw">for</span> <span class="kw">file</span> in <span class="kw">`ls</span> -p <span class="kw">|</span> <span class="kw">grep</span> <span class="st">&quot;.</span><span class="ot">${extension}</span><span class="st">$&quot;</span> <span class="kw">|</span> <span class="kw">sort`</span>
+<span class="kw">do</span>
+    <span class="ot">num=</span><span class="kw">`printf</span> <span class="st">&quot;%05d&quot;</span> <span class="ot">${cnt}</span><span class="kw">`</span>
+
+    <span class="kw">echo</span> <span class="st">&quot;</span><span class="ot">${file}</span><span class="st"> -&gt; </span><span class="ot">${num}</span><span class="st">.</span><span class="ot">${extension}</span><span class="st">&quot;</span>
+    <span class="kw">mv</span> <span class="ot">${file}</span> <span class="ot">${num}</span>.<span class="ot">${extension}</span>
+
+    <span class="ot">cnt=$((</span>cnt + 1<span class="ot">))</span>
+<span class="kw">done</span></code></pre></div>
+<h3 id="仕様">仕様</h3>
+<pre><code>./rename.sh 拡張子</code></pre>
+<ul>
+<li>第一引数に拡張子を指定し, その拡張子を持つ<strong>ファイル</strong>が5桁の連番に変更される.</li>
+<li>ディレクトリは名前変更の対象には<strong>ならない</strong>.</li>
+<li>第一引数が指定されていない場合はエラーとなる.</li>
+<li>変換の様子は &quot;変換前の名称 -&gt; 連番化の名称&quot; として表示される.</li>
+</ul>
+<h2 id="解説">解説</h2>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">if [</span> <span class="ot">$#</span> <span class="ot">-eq</span> 0<span class="kw"> ]</span>;
+<span class="kw">then</span>
+    <span class="kw">echo</span> <span class="st">&quot;拡張子を入力して下さい&quot;</span> <span class="kw">&gt;&amp;2</span>
+    <span class="kw">exit</span> 1
+<span class="kw">fi</span></code></pre></div>
+<p>このif文で渡された引数の数が0かどうかを確認する. もし0であれば拡張子が指定されていないということなのでエラー出力をして終了する. そうでなければif文全体を無視して次に進む.</p>
+<hr />
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="kw">file</span> in <span class="kw">`ls</span> -p <span class="kw">|</span> <span class="kw">grep</span> <span class="st">&quot;.</span><span class="ot">${extension}</span><span class="st">$&quot;</span> <span class="kw">|</span> <span class="kw">sort`</span></code></pre></div>
+<p>このfor文の右側について説明しよう.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">ls</span> -p</code></pre></div>
+<p>lsコマンドで-pオプションを使うと, 表示されるものがディレクトリのときにその名前の語尾に<strong>/</strong>が付くようになる. つまりは表示されているのがファイルなのかディレクトリなのかが明示的にわかるようになる.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">grep</span> <span class="st">&quot;.</span><span class="ot">${extension}</span><span class="st">$&quot;</span></code></pre></div>
+<p>このgrep文によって, 表示名のが&quot;.拡張子&quot;で終わっているもののみを表示することができる. ここでディレクトリは必然的に連番化の対象から外れることになる. ここではディレクトリは語尾が<strong>/</strong>で表させるためである.</p>
+<hr />
+<p>続いてfor文の中身に移ろう.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="kw">file</span> in <span class="kw">`ls</span> -p <span class="kw">|</span> <span class="kw">grep</span> <span class="st">&quot;.</span><span class="ot">${extension}</span><span class="st">$&quot;</span> <span class="kw">|</span> <span class="kw">sort`</span>
+<span class="kw">do</span>
+    <span class="ot">num=</span><span class="kw">`printf</span> <span class="st">&quot;%05d&quot;</span> <span class="ot">${cnt}</span><span class="kw">`</span>
+
+    <span class="kw">echo</span> <span class="st">&quot;</span><span class="ot">${file}</span><span class="st"> -&gt; </span><span class="ot">${num}</span><span class="st">.</span><span class="ot">${extension}</span><span class="st">&quot;</span>
+    <span class="kw">mv</span> <span class="ot">${file}</span> <span class="ot">${num}</span>.<span class="ot">${extension}</span>
+
+    <span class="ot">cnt=$((</span>cnt + 1<span class="ot">))</span>
+<span class="kw">done</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ot">num=</span><span class="kw">`printf</span> <span class="st">&quot;%05d&quot;</span> <span class="ot">${cnt}</span><span class="kw">`</span></code></pre></div>
+<p>ここでは, printf関数でループカウンタであるcnt変数の値を5桁表示に変換している. cntが5桁よりも小さければ, 大きい桁の部分が全部0で埋まるように表示される. 例えば cnt = 123 なら, num = 00123 と表示されることになる.</p>
+<p>なぜこのような0埋めをしているのかというと, 連番ファイルをソートするときには辞書順にソートされるからである. もし0埋めされていなければ,</p>
+<pre><code>1.png
+2.png
+5.png
+12.png
+13.png
+25.png</code></pre>
+<p>という名前のファイルがあったときに,</p>
+<pre><code>1.png
+12.png
+13.png
+2.png
+25.png
+5.png</code></pre>
+<p>のようにソートされてしまうのである. だからこれを防ぐために0埋めをしているわけなのである.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">echo</span> <span class="st">&quot;</span><span class="ot">${file}</span><span class="st"> -&gt; </span><span class="ot">${num}</span><span class="st">.</span><span class="ot">${extension}</span><span class="st">&quot;</span></code></pre></div>
+<p>ここでは変換処理中の様子を表示している.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ot">cnt=$((</span>cnt + 1<span class="ot">))</span></code></pre></div>
+<p>これはbashで使えるのテクニックのひとつでループカウンタのcntの値を1だけ増加する処理である. c言語とかのx += 1と同じようなものである.</p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

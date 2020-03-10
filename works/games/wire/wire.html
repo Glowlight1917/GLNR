@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ぐろーらいと人民共和国</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas {border: 1px solid black;}
+		</style>
+	</head>
+	<body>
+
+		<h1>Wire World</h1>
+
+		<h2>遊び方</h2>
+
+		start: シミュレーションを開始する<br>
+		draw: マスの状態を編集<br>
+		stop: シミュレーションを一時停止する<br>
+		reset: リセット<br>
+		マスの状態: マスの状態を指定する<br><br>
+
+		Wire Worldについて詳しくは<a href="https://ja.wikipedia.org/wiki/%E3%83%AF%E3%82%A4%E3%83%A4%E3%83%AF%E3%83%BC%E3%83%AB%E3%83%89">こちら(Wikipedia)</a>へ.<br><br>
+
+		<form name="controller">
+			<input type="button" value="start">
+			<input type="button" value="draw">
+			<input type="button" value="stop">
+			<input type="button" value="reset">
+
+			マスの状態
+			<select name="state">
+				<option value="0">0 真空</option>
+				<option value="1">1 導体</option>
+				<option value="2">2 電子の頭</option>
+				<option value="3">3 電子の尾</option>
+			</select>
+		</form>
+
+		<canvas id="canvas" width="640" height="480"></canvas>
+		<canvas id="lupe" width="160" height="120"></canvas>
+		<script src="wire.js"></script>
+		
+	</body>
+</html>

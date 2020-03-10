@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>第2回:画像を表示する</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">超越同盟</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>第2回:画像を表示する</h1>
+  <span class="date">2018.03.14</span>
+
+<p>ゲーム開発の基本. 画像を表示する方法を学ぼう. 画像の表示はどんなゲームでも行われているとても基本的なことなので是非これを出来るようになろう! あ, CUIのゲームも存在するか. まぁいいや.</p>
+<h2 id="方針">方針</h2>
+<ul>
+<li>画像を表示できるようになる.</li>
+</ul>
+<h2 id="ソースコード">ソースコード</h2>
+<p>Main.java: 以前とおなじ</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="kw">class</span> Main{
+    <span class="dt">static</span> <span class="kw">public</span> <span class="dt">void</span> <span class="fu">main</span>(String str[]){
+        GameMain test = <span class="kw">new</span> <span class="fu">GameMain</span>(); 
+    }
+}</code></pre></div>
+<p>GameMain.java: 以前とおなじ</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">import java.awt.*;</span>
+<span class="kw">import java.awt.event.*;</span>
+<span class="kw">import javax.swing.*;</span>
+<span class="kw">import javax.swing.event.*;</span>
+
+<span class="kw">import java.io.*;</span>
+
+<span class="kw">public</span> <span class="kw">class</span> GameMain <span class="kw">extends</span> JFrame{
+    <span class="kw">private</span> GameSequence sequence;
+
+    <span class="kw">public</span> <span class="fu">GameMain</span>(){
+        
+        <span class="fu">setDefaultCloseOperation</span>(JFrame.<span class="fu">EXIT_ON_CLOSE</span>);
+        <span class="fu">setLocationRelativeTo</span>(<span class="kw">null</span>);
+
+        sequence = <span class="kw">new</span> <span class="fu">GameSequence</span>();
+        <span class="fu">add</span>(sequence);
+
+        <span class="fu">pack</span>();
+        <span class="fu">setResizable</span>(<span class="kw">false</span>);
+        <span class="fu">setVisible</span>(<span class="kw">true</span>);
+    }
+
+    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span>(String str[]){
+        <span class="kw">new</span> <span class="fu">GameMain</span>();     
+    }
+}</code></pre></div>
+<p>GameSequence.java: シーケンス(紙芝居の1シーン)のクラス ブラウザのタブみたいなもの</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">import java.awt.*;</span>
+<span class="kw">import java.awt.event.*;</span>
+<span class="kw">import javax.swing.*;</span>
+<span class="kw">import javax.swing.event.*;</span>
+
+<span class="kw">import java.io.*;</span>
+<span class="kw">import java.util.ArrayList;</span>
+
+<span class="co">//GameSystem</span>
+<span class="kw">public</span> <span class="kw">class</span> GameSequence <span class="kw">extends</span> JPanel{
+    GameImage pic;
+
+    <span class="kw">public</span> <span class="fu">GameSequence</span>(){
+        <span class="fu">setPreferredSize</span>(<span class="kw">new</span> Dimension(<span class="dv">640</span>, <span class="dv">480</span>));
+        <span class="fu">setBackground</span>(Color.<span class="fu">BLACK</span>);
+
+        pic = <span class="kw">new</span> <span class="fu">GameImage</span>(<span class="st">&quot;bgp.png&quot;</span>);
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">paintComponent</span>(Graphics g){
+        <span class="kw">super</span>.<span class="fu">paintComponent</span>(g);
+        Graphics2D g2d = (Graphics2D)g;
+        
+        g2d.<span class="fu">drawImage</span>(pic.<span class="fu">getImg</span>(), <span class="dv">100</span>, -<span class="dv">100</span>, <span class="kw">this</span>);
+
+        Toolkit.<span class="fu">getDefaultToolkit</span>().<span class="fu">sync</span>();
+        g.<span class="fu">dispose</span>();
+    }
+}</code></pre></div>
+<p>GameImage.java: 画像を扱うためのクラス.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">import java.awt.*;</span>
+<span class="kw">import javax.swing.*;</span>
+<span class="kw">import javax.imageio.*;</span>
+<span class="kw">import java.awt.image.*;</span>
+<span class="kw">import java.io.*;</span>
+<span class="kw">import java.awt.geom.*;</span>
+
+<span class="co">//GameWrap</span>
+<span class="kw">public</span> <span class="kw">class</span> GameImage{
+    <span class="kw">protected</span> BufferedImage img;
+    <span class="kw">protected</span> <span class="dt">int</span> width;
+    <span class="kw">protected</span> <span class="dt">int</span> height;
+
+    <span class="kw">public</span> <span class="fu">GameImage</span>(String pic){
+        <span class="kw">try</span>{
+            <span class="kw">if</span>(pic != <span class="kw">null</span>){
+                img = ImageIO.<span class="fu">read</span>(<span class="kw">new</span> File(pic));
+            }
+
+            width = img.<span class="fu">getWidth</span>();
+            height = img.<span class="fu">getHeight</span>();
+        }<span class="kw">catch</span>(IOException e){
+            System.<span class="fu">out</span>.<span class="fu">println</span>(e);
+        }
+    }
+
+    <span class="kw">public</span> BufferedImage <span class="fu">getImg</span>(){
+        <span class="kw">return</span> img;
+    }
+    
+    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">getWidth</span>(){
+        <span class="kw">return</span> width;
+    }
+
+    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">getHeight</span>(){
+        <span class="kw">return</span> height;
+    }
+}</code></pre></div>
+<h2 id="解説">解説</h2>
+<p>Main.javaとGameMain.javaは前回と同じなので説明を省く. 今回新しく追加されたのはGameImage.javaというクラスだ. これは単にjava標準ライブラリの画像を扱うクラス, BufferedImageを継承したものに過ぎない. ただ単にコンストラクタ</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="fu">GameImage</span>(String pic)</code></pre></div>
+<p>を追加してファイルパスから読み込めるようにしただけである. 毎回この処理をす るのが面倒なので自動で出来るようにコンストラクタに組み込んだだけである. ではどうやって読み込んだ画像を表示すればいいのだろうか.</p>
+<p>ここでGameSequence.javaの出番となる. GameSequnece.javaコンストラクタにてGameImage型のインスタンスを生成している. その画像を表示するときは</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">paintComponet</span>(Graphics g)</code></pre></div>
+<p>というメソッドで特定の処理を行うと良い. ここでもよくわからない行があると思うが大部分をおまじないと思ってくれても良い. 注目すべきは</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java">g2d.<span class="fu">drawImage</span>(pic.<span class="fu">getImg</span>(), <span class="dv">0</span>, <span class="dv">0</span>, <span class="kw">this</span>);</code></pre></div>
+<p>という部分だ. これはpic.getImg()で読み込んだ画像をthisつまりGameSequenceに座標(0,0)で表示されるという処理である. 実行結果は次のようになる.</p>
+<div class="figure">
+<img src="block2_1.png" alt="画像の表示" />
+<p class="caption">画像の表示</p>
+</div>
+<p>ここで, 第2,3引数を変更すると画像を平行移動することが出来る.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java">g2d.<span class="fu">drawImage</span>(pic.<span class="fu">getImg</span>(), <span class="dv">100</span>, -<span class="dv">100</span>, <span class="kw">this</span>)</code></pre></div>
+<p>とすれば, 画像を座標(100,-100)を原点として表示することが出来る.</p>
+<div class="figure">
+<img src="block2_2.png" alt="画像の平行移動" />
+<p class="caption">画像の平行移動</p>
+</div>
+<p>この処理は非常に大事である. これはキャラクターを移動するときに使う手法なのである.</p>
+<p>javaの標準ライブラリでは画像を回転させたり, 直線や点そして長方形を描画することができるがそれはいずれ取り上げる予定だ. 今回はここまで. 次回は画像をチップに分割してそれらを表示することを扱う.</p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>惑星を生成する その1 - Great Circle Faulting の導入</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">超越同盟</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>惑星を生成する その1 - Great Circle Faulting の導入</h1>
+  <span class="date">2018.03.14</span>
+
+<p>RPGをしているとそのゲーム世界の地図を見ることがあるだろう. 例えば, 道に迷って今どこにいるかわからなくなったら地図を見て周囲の地形から現在地を把握するとか, 物語の進行で次の街に行く必要が出たので地図をみてそこまでの道のりを調べるとか, もうクリアしたのでまだ行っていない場所に行ってみようということで地図を見て未知の場所を探すとか, いろいろな場面で地図を見る機会が出てくる.</p>
+<p>ゲーム世界の地図を見ていると, ある違和感に気づくだろう. #B(なんかこの地形おかしくね?と言うやつだ. あれ? この世界, 東端に行ったら西端から出てくるし, 北端に行ったら南端からでてくるぞ! おいこれってドーナツじゃないか! この世界の形状ドーナツだぞ!! という定番のネタもあれば, この大陸の分布おかおかしくね? 海面が異常に少ないし, プレートの形状どうなってんの? って思わざるを得ないものもある.</p>
+<p>これは個別のゲーム作品の話だけではなく, ネット上にあるゲーム作成用の地形生成ソフトについても言える. 球面に対応し大陸の分布もきちんとしているやつがなかなか見つからないのだ. ゲーム作成をしていると, 地形生成やマップ生成は楽しいのではあるがなかなか面倒くさい. 自動化したくなる. なので地形生成ソフト使って自動生成しようと思っても, 上記の通りの有様である.</p>
+<p>ならば自分で作るしかないじゃないか! 私はそう決心した. いろんな生成アルゴリズムを試して, 何回も失敗を繰り返して納得の行く地形生成ソフトを作り上げてやろうではないか.</p>
+<h2 id="球面地形生成アルゴリズムの紹介-great-circle-faulting">球面地形生成アルゴリズムの紹介: Great Circle Faulting</h2>
+<p>球面に対応していて, かつそれっぽい地形を作れる手法として<strong>Great Circle Faulting </strong>(GCF)を紹介しよう.</p>
+<div class="figure">
+<img src="gcf1.png" alt="GCFの基本 ー 球の分割" />
+<p class="caption">GCFの基本 ー 球の分割</p>
+</div>
+<p>これは球面を大円で半分に分けて, 一方の高度を上げて, もう一方の高度を下げるという操作を何回も繰り返して地形を作り上げるという方法である. 上の図で言うと赤い線が大円であり, 球面上の円のうちで最も大きな円のことである. これを球面上にランダムに置くと, その大円を堺にして球を2つの領域に分けることが出来る. そして,赤い領域では標高を<span class="math inline">\(+1\)</span>だけ増加させ, 青い領域では<span class="math inline">\(-1\)</span>だけ減少させるという操作をする. これを<span class="math inline">\(i, (0 \leq i \leq n)\)</span>回繰り返すと惑星の地形が出来上がる. <span class="math inline">\(n\)</span>は多いほうが完成度が上がるが, その分重くなる. これがGCFの基本的な手法である.</p>
+<div class="figure">
+<img src="gcf2.png" alt="球の分割の繰り返し" />
+<p class="caption">球の分割の繰り返し</p>
+</div>
+<p>この図だけを見ても本当にこれで地形が出来上がるのか疑問にと思うだろう. なので実際にGCFを用いて生成した惑星の例をここに貼る.</p>
+<div class="figure">
+<img src="earth1.png" alt="GCFでの生成例 n=100" />
+<p class="caption">GCFでの生成例 n=100</p>
+</div>
+<p>地球っぽくなっているのがわかるだろう. 分割数が少ないのでまだ三角形が目立っている. もっと分割数を多くすればもっと地球らしくなる.</p>
+<p>次回で実際にこれを実装するアルゴリズムを紹介する予定である.</p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

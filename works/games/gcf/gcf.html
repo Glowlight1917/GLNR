@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ぐろーらいと人民共和国</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas {border: 1px solid black;}
+			input[type="input"] { width: 30px; }
+		</style>
+	</head>
+	<body>
+
+		<h1>惑星生成 Great Circle Faulting</h1>
+
+		<h2>遊び方</h2>
+
+		draw: 地図を描画する<br>
+		レンジバー: 海抜を変更<br><br>
+
+		生成までに<b>2秒ほど</b>時間がかかるので注意.<br><br>
+
+		作るときに参考にした資料は<a href="http://www.diku.dk/~torbenm/Planet/PSIslides.pdf">こちら(英文, PDF)</a><br><br>
+
+		<form name="controller">
+			<input type="button" value="draw">
+			<input type="range" value="0" min="-100" max="100">
+			海抜:
+			<input type="input" value="0">
+		</form>
+
+		<canvas id="canvas" width="640" height="480"></canvas>
+		<script src="gcf.js"></script>
+		
+	</body>
+</html>

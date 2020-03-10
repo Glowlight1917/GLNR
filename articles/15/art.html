@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="glowlight.info"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>共和国の自動化 その5. リンク集の自動生成</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">超越同盟</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>共和国の自動化 その5. リンク集の自動生成</h1>
+  <span class="date">2018.03.17</span>
+
+<h3 id="自動化の流れ">自動化の流れ</h3>
+<p>背景: 科学アカデミーの記事を楽に書きたい.</p>
+<ol style="list-style-type: decimal">
+<li>科学アカデミーの記事をMarkdownで記述することにした. 使うツールだRemarkableを採用.</li>
+<li>Markdown -&gt; html の変換はpandocを使う.</li>
+<li>Markdownを一括でhtmlに変換するスクリプトを書く.</li>
+<li>全部の記事についての情報を取得するスクリプトを書く.</li>
+<li><strong>科学アカデミーのリンク集を自動生成</strong></li>
+<li>科学アカデミーのディレクトリを同期する.</li>
+<li>更新情報を自動更新</li>
+</ol>
+<p>この記事で扱う内容は5, 6番目の事柄.</p>
+<h3 id="序文">序文</h3>
+<p>今回はついにリンク集を自動生成するためのスクリプトを紹介しようと思う.</p>
+<h2 id="リンク集データの生成">リンク集データの生成</h2>
+<h3 id="仕様">仕様</h3>
+<ul>
+<li>article_data変数で, 記事一覧データ(get_article_data.sh による)のファイルを指定</li>
+<li>head変数で見出しh1の内容を指定する.</li>
+<li>出力形式はmarkdownである.</li>
+</ul>
+<h3 id="スクリプトの解説">スクリプトの解説</h3>
+<p><strong>make_linklist.sh</strong></p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+
+<span class="ot">article_data=$1</span>
+<span class="ot">head=$2</span>
+
+<span class="kw">echo</span> <span class="st">&quot;# </span><span class="ot">${head}</span><span class="st">&quot;</span>
+<span class="kw">echo</span> <span class="st">&quot;&quot;</span>
+
+<span class="kw">for</span> <span class="kw">name</span> in <span class="kw">`cat</span> <span class="ot">${article_data}</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&quot;s/ /|/g&quot;</span><span class="kw">`</span>
+<span class="kw">do</span>
+    <span class="ot">link=</span><span class="kw">`echo</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">cut</span> -d<span class="st">&#39;|&#39;</span> -f 1<span class="kw">`</span>
+    <span class="ot">title=</span><span class="kw">`echo</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">cut</span> -d<span class="st">&#39;|&#39;</span> -f 2-<span class="kw">`</span>
+
+    <span class="kw">echo</span> <span class="st">&quot;[</span><span class="ot">${title}</span><span class="st">](study/</span><span class="ot">${link}</span><span class="st">)&quot;</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&quot;s/|/ /g&quot;</span>
+    <span class="kw">echo</span> <span class="st">&quot;&quot;</span>
+<span class="kw">done</span></code></pre></div>
+<p>記事一覧データをcatで表示してそれをfor文で走査する. ただしそのままではスペースで改行されるために正しく処理ができない.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="kw">name</span> in <span class="kw">`cat</span> <span class="ot">${article_data}</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&quot;s/ /|/g&quot;</span><span class="kw">`</span></code></pre></div>
+<p>ここのsed文で読み込むファイルのスペースを|に変換する. そうすれば改行コードだけが改行として扱われるために正しく処理をすることが出来る.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ot">link=</span><span class="kw">`echo</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">cut</span> -d<span class="st">&#39;|&#39;</span> -f 1<span class="kw">`</span>
+<span class="ot">title=</span><span class="kw">`echo</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">cut</span> -d<span class="st">&#39;|&#39;</span> -f 2-<span class="kw">`</span></code></pre></div>
+<p>ここで記事の相対パスとタイトルをデータファイルから抽出している. データファイルの形式は</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">earth3/art.html</span> 惑星を生成する その3 - 球面上の一様乱数
+<span class="kw">earth2/art.html</span> 惑星を生成する その2 - Great Circle Faulting の実装
+<span class="kw">earth/art.html</span> 惑星を生成する その1 - Great Circle Faulting の導入
+<span class="kw">block2/art.html</span> 第2回:画像を表示する
+<span class="kw">block1/art.html</span> 第1回:GUIの基礎の基礎ーウィンドウの表示をしよう!</code></pre></div>
+<p>このようになっている. タイトルにもスペースが含まれるのでawkとかでは上手く扱うことができない. こういうときはcutコマンドを使う.</p>
+<pre><code>cut -d&quot;区切り文字&quot; -f 列番号</code></pre>
+<p>このコマンドはこのようにして使う.</p>
+<ul>
+<li>使用例</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cut</span> -d<span class="st">&quot; &quot;</span> -f 1</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="kw">aa</span>:~/web/homepage]$ cat article_data <span class="kw">|</span> <span class="kw">cut</span> -d<span class="st">&#39; &#39;</span> -f 1
+<span class="kw">earth3/art.html</span>
+<span class="kw">earth2/art.html</span>
+<span class="kw">earth/art.html</span>
+<span class="kw">block2/art.html</span>
+<span class="kw">block1/art.html</span></code></pre></div>
+<p>このとき, スペースを区切り文字としてファイルの1列目のデータのみを表示することができる. ここで数字を2にすれば2行目だけを表示することが出来る.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cut</span> -d<span class="st">&quot;|&quot;</span> -f 2-</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="kw">aa</span>:~/web/homepage]$ cat article_data <span class="kw">|</span> <span class="kw">cut</span> -d<span class="st">&#39; &#39;</span> -f 2-
+惑星を生成する その<span class="kw">3</span> - 球面上の一様乱数
+惑星を生成する その<span class="kw">2</span> - Great Circle Faulting の実装
+惑星を生成する その<span class="kw">1</span> - Great Circle Faulting の導入
+第<span class="kw">2</span>回:画像を表示する
+第<span class="kw">1</span>回:GUIの基礎の基礎ーウィンドウの表示をしよう!</code></pre></div>
+<p>数字の<strong>直後</strong>に-ハイフンを付けることで<strong>2行目以降</strong>を全部表示することが出来る. この時の注意点としては, 数字とハイフンの間に<strong>スペースを入れないこと</strong></p>
+<p>このようにしてcutコマンドを使うことで上手く記事一覧情報ファイルから相対パスとタイトルのデータを抽出することができる.</p>
+<p>あとはmarkdown形式でリンクを作って表示すればよい. このときにtitle変数には区切り文字|が含まれているのでこれをsedでスペースに変換する.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">echo</span> <span class="st">&quot;[</span><span class="ot">${title}</span><span class="st">](study/</span><span class="ot">${link}</span><span class="st">)&quot;</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&quot;s/|/ /g&quot;</span>
+<span class="kw">echo</span> <span class="st">&quot;&quot;</span></code></pre></div>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

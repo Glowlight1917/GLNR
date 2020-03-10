@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight,ぐろーらいと, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>惑星を生成する その2 - Great Circle Faulting の実装</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../study.html">科学アカデミー</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">宗教</a>
+	<a href="../../labnote.html">実験ノート</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>惑星を生成する その2 - Great Circle Faulting の実装</h1>
+  <span class="date">2018.03.14</span>
+
+<p>前回の記事でGreat Circle Faulting(GCF)の基本的なアルゴリズムを紹介した. 今回はそのアルゴリズムを実装する方法を紹介していく. 必要なことは3つあり,</p>
+<ol style="list-style-type: decimal">
+<li>球を2つに分割すること</li>
+<li>それを何回も繰り返すこと</li>
+<li>標高を得ること</li>
+</ol>
+<p>である.</p>
+<h2 id="球面の分割法-ベクトルの内積を使う">球面の分割法 ベクトルの内積を使う</h2>
+<p>球面上の座標はベクトルを用いて表すことができる.</p>
+<div class="figure">
+<img src="earth1.png" alt="球面座標をベクトルで表す. 半径1としている." />
+<p class="caption">球面座標をベクトルで表す. 半径1としている.</p>
+</div>
+<p>球面の緯度 <span class="math inline">\(\theta\)</span>, 経度 <span class="math inline">\(\phi\)</span>が与えられたときに極座標と直交座標の変換公式を使えば, 図のようにその座標をベクトルで表すことが出来る. 北極なら<span class="math inline">\((0,0,1)\)</span>というベクトルで, 南極なら<span class="math inline">\((0.0.-1)\)</span>というベクトルで表される.</p>
+<div class="figure">
+<img src="earth2.png" alt="大円を法線ベクトルとして表す." />
+<p class="caption">大円を法線ベクトルとして表す.</p>
+</div>
+<p>大円も法線ベクトルで表すことが出来る. ランダムに法線ベクトルを球面上に設置すればそれだけで大円を置いたことになる. その法線ベクトルと他のベクトルの内積をとり, 内積が正のとき標高を<span class="math inline">\(+1\)</span>上げる, 負のとき標高を<span class="math inline">\(-1\)</span>下げる. とするのである.</p>
+<h2 id="標高を求める関数">標高を求める関数</h2>
+<p>複数回分割するときも同様にすればよくて, 球面座標を<span class="math inline">\(\boldsymbol{x}\)</span>, <span class="math inline">\(i\)</span>番目の大円の法線ベクトルを<span class="math inline">\(\boldsymbol{a}_i\)</span>とする. このときの標高は</p>
+<blockquote>
+<p>大円の法線ベクトルと座様の内積 × 標高の変化</p>
+</blockquote>
+<p>の総和を取ったものとなる. 数式で表すと,</p>
+<p><span class="math display">\[f(\boldsymbol{x}) = \sum ^n _{k=1} sgn( \boldsymbol{x} \cdot \boldsymbol{a}_k)\]</span></p>
+<p>となる.</p>
+<h2 id="標高の平均と標準偏差">標高の平均と標準偏差</h2>
+<p>法線ベクトルの向きは球面に対してランダムである. つまり球はランダムな方向にn回だけ2分割されることになる. ここである位置でそこが隆起するか沈降するかはどちらも<span class="math inline">\(\frac{1}{2}\)</span>の確率で決まることがわかる. 各分割処理は独立しているのである球面座標<span class="math inline">\(\boldsymbol{x}\)</span>での標高は</p>
+<p><span class="math display">\[&lt;h(\boldsymbol{x})&gt; = \sum ^n _{k=1} &lt;sgn( \boldsymbol{x} \cdot \boldsymbol{a}_k)&gt; =0\]</span></p>
+<p>である. 球面の平均標高は0である. つぎに標高の標準偏差を考えよう. そのためにはまずは標高の分散 <span class="math inline">\(\sigma^2 (\boldsymbol{x})\)</span>を求めよう. 平均標高が0なので,</p>
+<p><span class="math display">\[\sigma (\boldsymbol{x}) = &lt;(\sum ^n_{k=1} sgn( \boldsymbol{x} \cdot \boldsymbol{a}_k)) \times (\sum ^n_{k=1} sgn( \boldsymbol{x} \cdot \boldsymbol{a}_j))&gt; \]</span></p>
+<p><span class="math display">\[= \sum ^n_{k \neq j} &lt;sgn( \boldsymbol{x} \cdot \boldsymbol{a}_k)) \cdot sgn( \boldsymbol{x} \cdot \boldsymbol{a}_j)&gt; + \sum ^n_{k=1} 1 \]</span></p>
+<p><span class="math display">\[= \sum ^n_{k \neq j} &lt;sgn( \boldsymbol{x} \cdot \boldsymbol{a}_k))&gt;
+&lt;sgn( \boldsymbol{x} \cdot \boldsymbol{a}_j)&gt; + n \]</span></p>
+<p><span class="math display">\[= n \]</span></p>
+<p>なお, 2行目の右辺第二項では符号関数の2乗は1になることを利用し, 3行目の右辺第1項では各分割が独立であることを利用した. なのでこの結果から標高の標準偏差は<span class="math inline">\(\sqrt{n}\)</span>であることがわかった.</p>
+<p>まとめると, ある位置での平均標高と標高の標準偏差は</p>
+<ul>
+<li>平均: 0</li>
+<li>標準偏差: <span class="math inline">\(\sqrt{n}\)</span></li>
+</ul>
+<p>となる.</p>
+<h2 id="おわりに">おわりに</h2>
+<p>今回はGCFの実装方法について紹介した. 球の大円を用いた分割法, ベクトルを用いた座標・大円の表現, 標高を得る関数, といったものを紹介した.</p>
+<p>で, ベクトルを用いた大円の表現のところで, 法線ベクトルをランダムに生成すればよいと書いていたが, 実はここに注意が必要である. 緯度th・経度phをそのまま一様乱数を用いて生成すると座標が極値に偏ってしまうのである. 次回はこの点について取り上げる.</p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

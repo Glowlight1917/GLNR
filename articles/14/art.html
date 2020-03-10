@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>共和国の自動化 その4. 記事情報の取得</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">超越同盟</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>共和国の自動化 その4. 記事情報の取得</h1>
+  <span class="date">2018.03.16</span>
+
+<h2 id="はじめに">はじめに</h2>
+<h3 id="自動化の流れ">自動化の流れ</h3>
+<p>背景: 科学アカデミーの記事を楽に書きたい.</p>
+<ol style="list-style-type: decimal">
+<li>科学アカデミーの記事をMarkdownで記述することにした. 使うツールだRemarkableを採用.</li>
+<li>Markdown -&gt; html の変換はpandocを使う.</li>
+<li>Markdownを一括でhtmlに変換するスクリプトを書く.</li>
+<li><strong>全部の記事についての情報を取得するスクリプトを書く.</strong></li>
+<li>科学アカデミーのリンク集を自動生成</li>
+<li>科学アカデミーのディレクトリを同期する.</li>
+<li>更新情報を自動更新</li>
+</ol>
+<p>この記事で扱う内容は4番めの事柄.</p>
+<h3 id="序文">序文</h3>
+<p>今回紹介するスクリプトは, 記事があるディレクトリ全体を走査して存在する記事のタイトル, パスを取得して一覧情報を生成するものである. この情報を基にして科学アカデミーのリンク集の自動生成が行われることになる.</p>
+<h2 id="スクリプトの解説">スクリプトの解説</h2>
+<h3 id="仕様">仕様</h3>
+<ul>
+<li>記事のパスはdata_dirよりも上のパスを消して表示される. 相対パスに変換するためである.</li>
+<li>記事のタイトルはtitleタグから取得する. 無かったらno_titleとして表示する.</li>
+</ul>
+<h3 id="スクリプト">スクリプト</h3>
+<p><strong>get_article_data.sh</strong></p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+
+<span class="co">#記事のデータを取得するスクリプト</span>
+
+<span class="ot">data_dir=${1%</span>/<span class="ot">}</span>
+<span class="ot">extension=$2</span>
+
+<span class="kw">if [</span> <span class="ot">$#</span> <span class="ot">-eq</span> 0<span class="kw"> ]</span>;
+<span class="kw">then</span>
+    <span class="kw">echo</span> <span class="st">&quot;./get_article_data.sh data_dir extension&quot;</span> <span class="kw">&gt;&amp;2</span>
+    <span class="kw">exit</span> 1
+<span class="kw">fi</span>
+
+<span class="co">#nameはフルパスである.</span>
+<span class="kw">for</span> <span class="kw">name</span> in <span class="kw">`find</span> <span class="ot">${data_dir}</span> -name <span class="st">&quot;*.</span><span class="ot">${extension}</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="kw">sort`</span>
+<span class="kw">do</span>
+    <span class="co">#パスデータを編集 -&gt;  記事の直属のディレクト/記事ファイル名</span>
+    <span class="ot">link=</span><span class="kw">`echo</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&quot;s#</span><span class="ot">${data_dir}</span><span class="st">/##g&quot;</span><span class="kw">`</span>
+
+    <span class="co">#記事の題名を取得 for HTML</span>
+    <span class="ot">title=</span><span class="kw">`cat</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">grep</span> <span class="st">&#39;&lt;title&gt;.*&lt;/title&gt;&#39;</span> \
+            <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&#39;s#\s.*&lt;title&gt;##g&#39;</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&#39;s#&lt;/title&gt;##g&#39;</span><span class="kw">`</span>
+
+    <span class="co">#タイトルが付いていない場合</span>
+    <span class="kw">if [</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="ot">${title}</span><span class="st">&quot;</span><span class="kw"> ]</span>;
+    <span class="kw">then</span>
+        <span class="ot">title=</span><span class="st">&quot;no_title&quot;</span>
+    <span class="kw">fi</span>
+
+    <span class="kw">echo</span> <span class="st">&quot;</span><span class="ot">${link}</span><span class="st"> </span><span class="ot">${title}</span><span class="st">&quot;</span>
+<span class="kw">done</span>
+
+<span class="kw">exit</span> 0</code></pre></div>
+<p>記事ファイルの相対パスを取得する箇所</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#パスデータを編集 -&gt;  記事の直属のディレクト/記事ファイル名</span>
+<span class="ot">link=</span><span class="kw">`echo</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&quot;s#</span><span class="ot">${data_dir}</span><span class="st">/##g&quot;</span><span class="kw">`</span></code></pre></div>
+<p>ここではフルパスとして取得された, 記事のパスをsedコマンドでdata_dirのところを削除することによって相対パスに変換している. sedコマンドの区切り文字が#になっているのは, そうしないとパス文字列に含まれるスラッシュのせいで上手く動作しないからである.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#記事の題名を取得 for HTML</span>
+<span class="ot">title=</span><span class="kw">`cat</span> <span class="ot">${name}</span> <span class="kw">|</span> <span class="kw">grep</span> <span class="st">&#39;&lt;title&gt;.*&lt;/title&gt;&#39;</span> \
+        <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&#39;s#\s.*&lt;title&gt;##g&#39;</span> <span class="kw">|</span> <span class="kw">sed</span> <span class="st">&#39;s#&lt;/title&gt;##g&#39;</span><span class="kw">`</span></code></pre></div>
+<p>htmlファイルのtitleタグから記事のタイトルを取得している. その処理はcatで記事を表示してそこからtitleタグの部分を抜き出してタグの部分を取り除くという原始的な方法を使っている.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#タイトルが付いていない場合</span>
+<span class="kw">if [</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="ot">${title}</span><span class="st">&quot;</span><span class="kw"> ]</span>;
+<span class="kw">then</span>
+    <span class="ot">title=</span><span class="st">&quot;no_title&quot;</span>
+<span class="kw">fi</span></code></pre></div>
+<p>タイトル取得処理ができなかった場合. つまり記事にタイトルが存在しない場合はtitle変数には空文字列が代入される. そういうときにはtitle変数にno_titleを変わりに代入している. この処理をするときにtitleが空白であるかを確認する必要がある. この辺は<a href="http://d.hatena.ne.jp/masa_edw/20080422/1208834378">このサイト</a>を参考にした.</p>
+<h3 id="スクリプトの実行例">スクリプトの実行例</h3>
+<p>左側が記事の相対パス, 残りが記事のタイトル. タイトルにもスペースが含まれているがそこはcutコマンドを使えば上手く扱うことができる.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="kw">aa</span>:~/web/homepage]$ cat article_data 
+<span class="kw">earth3/art.html</span> 惑星を生成する その3 - 球面上の一様乱数
+<span class="kw">earth2/art.html</span> 惑星を生成する その2 - Great Circle Faulting の実装
+<span class="kw">earth/art.html</span> 惑星を生成する その1 - Great Circle Faulting の導入
+<span class="kw">block2/art.html</span> 第2回:画像を表示する
+<span class="kw">block1/art.html</span> 第1回:GUIの基礎の基礎ーウィンドウの表示をしよう!
+<span class="kw">web_auto03/art.html</span> 共和国の自動化 その3. pandocを用いたhtmlへの変換
+<span class="kw">web_auto02/art.html</span> 共和国の自動化 その2 記事作成
+<span class="kw">autokizi/art.html</span> 共和国の自動化 その1. 記事作成スクリプト
+<span class="kw">col_circle/art.html</span> 円同士の重なり
+<span class="kw">renban/art.html</span> ファイル名を連番にしてくれるスクリプトをつくろう!
+<span class="kw">logdata/art.html</span> LogData.java の ドキュメント
+<span class="kw">line/art.html</span> Line.java
+<span class="kw">terrain_gimp01/art.html</span> Gimpで地形生成をしよう! その1</code></pre></div>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

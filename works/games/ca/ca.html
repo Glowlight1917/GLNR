@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ぐろーらいと人民共和国</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas {border: 1px solid black;}
+			#canvas {display: none;}
+		</style>
+	</head>
+	<body>
+
+		<h1>一次元セルオートマトン</h1>
+
+		<h2>遊び方</h2>
+
+		start: シミュレーションを開始する<br>
+		stop: シミュレーションを一時停止する<br>
+		reset: 初期条件を変えてリセット<br><br>
+
+		rule: 状態遷移のルールを設定する. 0以上255以下の整数を設定すること. <br>
+		*ルールの変更はresetボタンにより有効になります.<br><br>
+
+
+		セルオートマトンについて詳しくは<a href="https://ja.wikipedia.org/wiki/%E3%82%BB%E3%83%AB%E3%83%BB%E3%82%AA%E3%83%BC%E3%83%88%E3%83%9E%E3%83%88%E3%83%B3#%E3%83%AB%E3%83%BC%E3%83%AB110%E3%82%BB%E3%83%AB%E3%83%BB%E3%82%AA%E3%83%BC%E3%83%88%E3%83%9E%E3%83%88%E3%83%B3">こちら(Wikipedia)</a>へ.<br>
+		canvasのちらつき防止には<a href="https://code.i-harness.com/ja/q/2aa705">このサイト</a>が大いに役立った. ありがとう同志よ.<br><br>
+
+		<form name="controller">
+			<input type="button" value="start">
+			<input type="button" value="stop">
+			<input type="button" value="reset">
+			| rule <input name="rule" type="text" value="90">
+		</form>
+
+		<canvas id="canvas" width="640" height="480"></canvas>
+		<canvas id="canvas2" width="640" height="480"></canvas>
+		<script src="ca.js"></script>
+
+		
+	</body>
+</html>

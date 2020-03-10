@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight,ぐろーらいと, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>共和国の自動化 その1. 記事作成スクリプト</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../study.html">科学アカデミー</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">宗教</a>
+	<a href="../../labnote.html">実験ノート</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>共和国の自動化 その1. 記事作成スクリプト</h1>
+  <span class="date">2018.03.14</span>
+
+<p>このサイト, ぐろーらいと人民共和国は長い間, html手打ちで作られてきた.最初のうちはそれでも良かったが, 次第に面倒くさくなってきた. サイト建設初期の場合はhtmlのタグを打ち込むことが大部分を占めていたので手打ちでも十分に効率的に作業することができた. しかし, 「科学アカデミー」用の記事を書くにあたっては効率が大幅に落ちた. これらの記事の作成作業のほとんどが文章作成と画像貼り付け, ソースコード貼り付けになっていて, htmlタグは使い回すだけとなっていた.</p>
+<p>というわけでその解決方法として#B(自作の記事作成スクリプトを作ることにした. 画像添付タグ, ソースコード表示タグ, 強調表現タグ, 見出しタグなどのいくつかのタグを定義して, それを文章中に埋め込んでhtmlファイルに変換する. このようなことができれば記事作成は大幅に楽になるはずだ. 実際この記事もそのスクリプトを使って書いているが実際に作業効率は格段に良くなった.</p>
+<p>では, 記事作成用スクリプトの使用を紹介しよう.</p>
+<h2 id="スクリプトの仕様">スクリプトの仕様</h2>
+<p>タグは</p>
+<pre><code>@タグ名(引数)@</code></pre>
+<p>のように@で囲んで書く. 本当はイゲタを用いて実装しているが, スクリプトの誤爆対策のためにここでは@で代用している.</p>
+<pre><code>@TAG(string)@</code></pre>
+<p>記事に登録タグを設定する. これに基づいて記事は「科学アカデミー」の記事一覧に自動で配置される.</p>
+<pre><code>#HL(@TITLE(string)@</code></pre>
+<p>記事のタイトルを設定する.</p>
+<pre><code>#HL(@SRC(URL)@</code></pre>
+<p>指定のソースコードを表示する.</p>
+<pre><code>#HL(@SRC(n\, m\, URL)@</code></pre>
+<p>n行からm行までの指定のソースコードを表示する.</p>
+<pre><code>#HL(@H(m\,string)@</code></pre>
+<p>見出しを設定する. <hm>-</hm>タグに変換される. mは自然数.</p>
+<pre><code>#HL(@PIC(URL\,string)@</code></pre>
+<p>画像を貼り付ける. stringは画像に対する説明文になる.</p>
+<pre><code>#HL(@HL(string)@</code></pre>
+<p>要点を表示する. ピックアップ.</p>
+<pre><code>#HL(@B(string)@</code></pre>
+<p>囲んだ部分が太文字になる.</p>
+<pre><code>#HL(@I(string)@</code></pre>
+<p>囲んだ部分が斜体になる.</p>
+<pre><code>#HL(@LINK(URL\, string)@</code></pre>
+<p>リンクを作成する.</p>
+<p>要するにタグの部分をプログラムでhtmlタグに置換してhtmlファイルを作るということだ. 今回はこれを行うプログラムをpython3で実装した.</p>
+<h2 id="実行例">実行例</h2>
+<p>これだけではどう動くかが想像しにくいと思うので具体的な実行例をここに載せてみる</p>
+<div class="figure">
+<img src="manuscript.png" alt="記事の原稿 vimで記事を書いている" />
+<p class="caption">記事の原稿 vimで記事を書いている</p>
+</div>
+<p>ここに表示されている原稿をpythonで実装したプログラムでhtmlタグに変換するとこのようになる.</p>
+<div class="figure">
+<img src="code.png" alt="生成されたhtmlファイル" />
+<p class="caption">生成されたhtmlファイル</p>
+</div>
+<p>どうよ. ちゃんとhtmlに変換されているだろう? しかもただ単に変換されるだけではなく, このサイトのhtmlテンプレートに従って出力されているのだ.ではブラウザではどのように表示されるのかというと</p>
+<div class="figure">
+<img src="brws.png" alt="ブラウザでの表示例" />
+<p class="caption">ブラウザでの表示例</p>
+</div>
+<p>このようになる.ちゃんとぐろーらいと人民共和国のデザインに従って, 見出しもついていて, 画像も表示されているのがわかるだろう.</p>
+<p>まあ, こんなかんじで原稿スクリプトからhtmlに変換されるわけである.次回は実際にどのようにスクリプトが実装されているのかを紹介する.</p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

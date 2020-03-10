@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ぐろーらいと人民共和国</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas {border: 1px solid black;}
+		</style>
+	</head>
+	<body>
+
+		<h1>Boidモデル ー 鳥の群れのシミュレーション</h1>
+
+		<h2>遊び方</h2>
+
+		start: シミュレーションを開始する<br>
+		stop: シミュレーションを一時停止する<br>
+		reset: 初期条件を変えてリセット<br><br>
+
+		Boidモデルついて参考にしたサイトは<a href="https://www.red3d.com/cwr/boids/">こちら(英文)</a>へ.<br><br>
+
+		<form name="controller">
+			<input type="button" value="start">
+			<input type="button" value="stop">
+			<input type="button" value="reset">
+		</form>
+
+		<canvas id="canvas" width="640" height="480"></canvas>
+		<script src="boid.js"></script>
+		
+	</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>共和国の自動化 その3. pandocを用いたhtmlへの変換</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">超越同盟</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>共和国の自動化 その3. pandocを用いたhtmlへの変換</h1>
+  <span class="date">2018.03.15</span>
+
+<h2 id="はじめに">はじめに</h2>
+<h3 id="自動化の流れ">自動化の流れ</h3>
+<p>背景: 科学アカデミーの記事を楽に書きたい.</p>
+<ol style="list-style-type: decimal">
+<li>科学アカデミーの記事をMarkdownで記述することにした. 使うツールだRemarkableを採用.</li>
+<li>Markdown -&gt; html の変換はpandocを使う.</li>
+<li><strong>Markdownを一括でhtmlに変換するスクリプトを書く.</strong></li>
+<li>全部の記事についての情報を取得するスクリプトを書く.</li>
+<li>科学アカデミーのリンク集を自動生成</li>
+<li>科学アカデミーのディレクトリを同期する.</li>
+<li>更新情報を自動更新</li>
+</ol>
+<p>この記事で扱う内容は3番めの事柄.</p>
+<h3 id="序文">序文</h3>
+<p>前回の記事ではRemarkableで書いた原稿マークダウンファイルをhtmlに変換するときに, 共和国のスタイルに合わせるためにRemarkableのhtml出力部分を書き換えるという方針をとっていたが, 途中で<strong>Pandoc</strong>というファイル変換ソフトに遭遇したので方針を変更することにした.</p>
+<p>PandocではBashでコマンド実行により自動で複数のマークダウンファイルをhtmlに変換することが出来る. そしてテンプレートを利用することでCSSの設定やタイトル・日付の設定ができるという自由度の高い出力ができる. このような利点があるのでファイル変換に関してはRemarkableのエクスポート機能ではなく, Pandocを使うことにした. でも原稿をマークダウンで書くときはRemarkableを使い続けるのは変わらない.</p>
+<p>今回はPandocを使ってマークダウンファイルを一括でhtmlに変換するシェルスクリプトを紹介する.</p>
+<h2 id="変換スクリプト">変換スクリプト</h2>
+<p><strong>convert_md2html.sh</strong></p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+
+<span class="co">#マークダウンをhtmlに変換する</span>
+
+<span class="ot">dir_path=${1%</span>/<span class="ot">}</span>
+<span class="ot">css_path=$2</span>
+
+<span class="co">#引数が2つでなければエラー</span>
+<span class="kw">if [</span> <span class="ot">$#</span> <span class="ot">-ne</span> 2<span class="kw"> ]</span>;
+<span class="kw">then</span>
+    <span class="kw">echo</span> <span class="st">&quot;./convert_md2html.sh dir_path css_path&quot;</span> <span class="kw">&gt;&amp;2</span>
+    <span class="kw">exit</span> 1
+<span class="kw">fi</span>
+
+<span class="co">#マークダウンファイル全体を走査</span>
+<span class="kw">for</span> <span class="kw">name</span> in <span class="kw">`find</span> <span class="ot">${dir_path}</span> -name <span class="st">&quot;*.md&quot;</span> <span class="kw">|</span> <span class="kw">sort`</span>
+<span class="kw">do</span>
+    <span class="co">#ファイルが存在するか確認</span>
+    <span class="kw">if [</span> <span class="ot">!</span> <span class="ot">-e</span> <span class="ot">${name}</span><span class="kw"> ]</span>;
+    <span class="kw">then</span>
+        <span class="kw">continue</span>
+    <span class="kw">fi</span>
+
+    <span class="co">#原稿マークダウンファイルが存在するディレクトリを取得</span>
+    <span class="ot">article_dir_path=</span><span class="kw">`dirname</span> <span class="ot">${name}</span><span class="kw">`</span>
+
+    <span class="co">#pandocコマンドでmarkdownをhtmlに変換</span>
+    <span class="kw">pandoc</span> --mathjax <span class="ot">${name}</span> --template=template \
+            -c <span class="ot">${css_path}</span> -o <span class="ot">${article_dir_path}</span>/art.html
+
+    <span class="kw">echo</span> <span class="ot">${name}</span>
+<span class="kw">done</span>
+
+<span class="kw">exit</span> 0</code></pre></div>
+<p><strong>コマンド例</strong></p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">./convert_md2html.sh</span> ~/Documents/study ../article_style.css</code></pre></div>
+<h2 id="解説">解説</h2>
+<p>やっていることはスクリプト内にコメントで書いたから省くが, 実際にどのように動作するのかを書いていく.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ot">dir_path=${1%</span>/<span class="ot">}</span>
+<span class="ot">css_path=$2</span></code></pre></div>
+<p>これの一行目の<strong>${1%/}</strong>は引数の末尾についているスラッシュを取り除くときに使う表記である. この手法は<a href="http://linux.just4fun.biz/?%E9%80%86%E5%BC%95%E3%81%8D%E3%82%B7%E3%82%A7%E3%83%AB%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88/%E5%BC%95%E6%95%B0%E3%81%A7%E6%B8%A1%E3%81%95%E3%82%8C%E3%81%9F%E6%9C%80%E6%9C%9F%E3%81%AE%E3%82%B9%E3%83%A9%E3%83%83%E3%82%B7%E3%83%A5%E3%82%92%E5%89%8A%E9%99%A4%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95">このサイト</a>がとても参考になった.</p>
+<p>ディレクトリの扱うシェルスクリプトを作っている時は, ディレクトリ名の末尾にスラッシュが付いていると変な動作をすることがあり, ようするにバグの原因となる. だから末尾のスラッシュを楽に取り除くということは結構重要なことである.</p>
+<hr />
+<p>for文のfindコマンドを実行すると次のようになる.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="kw">aa</span>:~/web/homepage]$ find ~/Documents/study -name <span class="st">&quot;*.md&quot;</span>
+<span class="kw">/home/aa/Documents/study/earth2/ms.md</span>
+<span class="kw">/home/aa/Documents/study/logdata/ms.md</span>
+<span class="kw">/home/aa/Documents/study/col_circle/ms.md</span>
+<span class="kw">/home/aa/Documents/study/renban/ms.md</span>
+<span class="kw">/home/aa/Documents/study/autokizi/ms.md</span>
+<span class="kw">/home/aa/Documents/study/block2/ms.md</span>
+<span class="kw">/home/aa/Documents/study/earth/ms.md</span>
+<span class="kw">/home/aa/Documents/study/web_auto02/ms.md</span>
+<span class="kw">/home/aa/Documents/study/block1/ms.md</span>
+<span class="kw">/home/aa/Documents/study/web_auto03/ms.md</span>
+<span class="kw">/home/aa/Documents/study/terrain_gimp01/ms.md</span>
+<span class="kw">/home/aa/Documents/study/line/ms.md</span></code></pre></div>
+<p>指定のディレクトリ以下に存在する全てのマークダウンファイルを走査して, それをフルパスで一覧として表示する. これが一つ一つ順番にname変数に格納される.</p>
+<p>そして次に<strong>dirname</strong>コマンドでマークダウンファイルが属しているディレクトリのフルパスの情報に変換されれる. この情報は出力先のhtmlファイルの名前に利用される.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="kw">aa</span>:~/web/homepage]$ dirname <span class="st">&quot;aaa/bbb/oooo.md&quot;</span>
+<span class="kw">aaa/bbb</span></code></pre></div>
+<p>とまあ, こんな感じに末尾のスラッシュ無しにディレクトリ名が取得できる.</p>
+<hr />
+<p>次はこのスクリプトの核となる部分. マークダウンを変換する部分だ.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">    <span class="co">#pandocコマンドでmarkdownをhtmlに変換</span>
+    <span class="kw">pandoc</span> --mathjax <span class="ot">${name}</span> --template=template \
+            -c <span class="ot">${css_path}</span> -o <span class="ot">${article_dir_path}</span>/art.html</code></pre></div>
+<p>ここを解説する前に, 具体的にpandocがどんな処理をするのかを確認してみよう. ここで変換対象となるマークダウンファイルを用意しよう</p>
+<p><strong>aaa.md</strong></p>
+<div class="sourceCode"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span class="fu"># マークダウン変換テスト</span>
+
+これはテストです.
+
+<span class="fu">## 数式の変換</span>
+
+$$ x^n + y^n = z^n $$</code></pre></div>
+<p>まずは一番単純な基本となるコマンド形式</p>
+<ul>
+<li><strong>pandoc <em>入力ファイル</em> -o <em>出力ファイル</em> </strong></li>
+</ul>
+<p>この場合はタグ変換しただけのhtmlファイルが出力される.</p>
+<p><strong>出力例</strong></p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;h1</span><span class="ot"> id=</span><span class="st">&quot;マークダウン変換テスト&quot;</span><span class="kw">&gt;</span>マークダウン変換テスト<span class="kw">&lt;/h1&gt;</span>
+<span class="kw">&lt;p&gt;</span>これはテストです.<span class="kw">&lt;/p&gt;</span>
+<span class="kw">&lt;h2</span><span class="ot"> id=</span><span class="st">&quot;数式の変換&quot;</span><span class="kw">&gt;</span>数式の変換<span class="kw">&lt;/h2&gt;</span>
+<span class="kw">&lt;p&gt;&lt;br</span> <span class="kw">/&gt;&lt;span</span><span class="ot"> class=</span><span class="st">&quot;math display&quot;</span><span class="kw">&gt;&lt;em&gt;</span>x<span class="kw">&lt;/em&gt;&lt;sup&gt;&lt;em&gt;</span>n<span class="kw">&lt;/em&gt;&lt;/sup&gt;</span> + <span class="kw">&lt;em&gt;</span>y<span class="kw">&lt;/em&gt;&lt;sup&gt;&lt;em&gt;</span>n<span class="kw">&lt;/em&gt;&lt;/sup&gt;</span> = <span class="kw">&lt;em&gt;</span>z<span class="kw">&lt;/em&gt;&lt;sup&gt;&lt;em&gt;</span>n<span class="kw">&lt;/em&gt;&lt;/sup&gt;&lt;/span&gt;&lt;br</span> <span class="kw">/&gt;&lt;/p&gt;</span></code></pre></div>
+<ul>
+<li><strong>pandoc <em>入力ファイル</em> -so <em>出力ファイル</em> </strong></li>
+</ul>
+<p>この場合はちゃんとしたhtmlファイルが出力される.</p>
+<p><strong>出力例</strong></p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="dt">&lt;!DOCTYPE </span>html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;<span class="dt">&gt;</span>
+<span class="kw">&lt;html</span><span class="ot"> xmlns=</span><span class="st">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="kw">&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> http-equiv=</span><span class="st">&quot;Content-Type&quot;</span><span class="ot"> content=</span><span class="st">&quot;text/html; charset=utf-8&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> http-equiv=</span><span class="st">&quot;Content-Style-Type&quot;</span><span class="ot"> content=</span><span class="st">&quot;text/css&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> name=</span><span class="st">&quot;generator&quot;</span><span class="ot"> content=</span><span class="st">&quot;pandoc&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;title&gt;&lt;/title&gt;</span>
+  <span class="kw">&lt;style</span><span class="ot"> type=</span><span class="st">&quot;text/css&quot;</span><span class="kw">&gt;</span>code<span class="kw">{white-space:</span> <span class="dt">pre</span><span class="kw">;}&lt;/style&gt;</span>
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+<span class="kw">&lt;h1</span><span class="ot"> id=</span><span class="st">&quot;マークダウン変換テスト&quot;</span><span class="kw">&gt;</span>マークダウン変換テスト<span class="kw">&lt;/h1&gt;</span>
+<span class="kw">&lt;p&gt;</span>これはテストです.<span class="kw">&lt;/p&gt;</span>
+<span class="kw">&lt;h2</span><span class="ot"> id=</span><span class="st">&quot;数式の変換&quot;</span><span class="kw">&gt;</span>数式の変換<span class="kw">&lt;/h2&gt;</span>
+<span class="kw">&lt;p&gt;&lt;br</span> <span class="kw">/&gt;&lt;span</span><span class="ot"> class=</span><span class="st">&quot;math display&quot;</span><span class="kw">&gt;&lt;em&gt;</span>x<span class="kw">&lt;/em&gt;&lt;sup&gt;&lt;em&gt;</span>n<span class="kw">&lt;/em&gt;&lt;/sup&gt;</span> + <span class="kw">&lt;em&gt;</span>y<span class="kw">&lt;/em&gt;&lt;sup&gt;&lt;em&gt;</span>n<span class="kw">&lt;/em&gt;&lt;/sup&gt;</span> = <span class="kw">&lt;em&gt;</span>z<span class="kw">&lt;/em&gt;&lt;sup&gt;&lt;em&gt;</span>n<span class="kw">&lt;/em&gt;&lt;/sup&gt;&lt;/span&gt;&lt;br</span> <span class="kw">/&gt;&lt;/p&gt;</span>
+<span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<p>これでもまだ数式の表示はしょぼいままだ. このときはmathjaxオプションを指定すればTex形式の数式が表示できる.</p>
+<ul>
+<li><strong>pandoc --mathjax <em>入力ファイル</em> -so <em>出力ファイル</em> </strong></li>
+</ul>
+<p>数式がTex形式で表示される.</p>
+<p><strong>出力例</strong></p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="dt">&lt;!DOCTYPE </span>html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;<span class="dt">&gt;</span>
+<span class="kw">&lt;html</span><span class="ot"> xmlns=</span><span class="st">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="kw">&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> http-equiv=</span><span class="st">&quot;Content-Type&quot;</span><span class="ot"> content=</span><span class="st">&quot;text/html; charset=utf-8&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> http-equiv=</span><span class="st">&quot;Content-Style-Type&quot;</span><span class="ot"> content=</span><span class="st">&quot;text/css&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> name=</span><span class="st">&quot;generator&quot;</span><span class="ot"> content=</span><span class="st">&quot;pandoc&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;title&gt;&lt;/title&gt;</span>
+  <span class="kw">&lt;style</span><span class="ot"> type=</span><span class="st">&quot;text/css&quot;</span><span class="kw">&gt;</span>code<span class="kw">{white-space:</span> <span class="dt">pre</span><span class="kw">;}&lt;/style&gt;</span>
+  <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;</span><span class="ot"> type=</span><span class="st">&quot;text/javascript&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+<span class="kw">&lt;h1</span><span class="ot"> id=</span><span class="st">&quot;マークダウン変換テスト&quot;</span><span class="kw">&gt;</span>マークダウン変換テスト<span class="kw">&lt;/h1&gt;</span>
+<span class="kw">&lt;p&gt;</span>これはテストです.<span class="kw">&lt;/p&gt;</span>
+<span class="kw">&lt;h2</span><span class="ot"> id=</span><span class="st">&quot;数式の変換&quot;</span><span class="kw">&gt;</span>数式の変換<span class="kw">&lt;/h2&gt;</span>
+<span class="kw">&lt;p&gt;&lt;span</span><span class="ot"> class=</span><span class="st">&quot;math display&quot;</span><span class="kw">&gt;</span>\[ x^n + y^n = z^n \]<span class="kw">&lt;/span&gt;&lt;/p&gt;</span>
+<span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<p>もちろんスタイルシートを適応することもできる.</p>
+<ul>
+<li><strong>pandoc --mathjax <em>入力ファイル</em> -c <em>スタイルシートファイル</em> -so <em>出力ファイル</em> </strong></li>
+</ul>
+<p>出力にスタイルシートを適応する.</p>
+<p><strong>出力例</strong></p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="dt">&lt;!DOCTYPE </span>html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;<span class="dt">&gt;</span>
+<span class="kw">&lt;html</span><span class="ot"> xmlns=</span><span class="st">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="kw">&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> http-equiv=</span><span class="st">&quot;Content-Type&quot;</span><span class="ot"> content=</span><span class="st">&quot;text/html; charset=utf-8&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> http-equiv=</span><span class="st">&quot;Content-Style-Type&quot;</span><span class="ot"> content=</span><span class="st">&quot;text/css&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;meta</span><span class="ot"> name=</span><span class="st">&quot;generator&quot;</span><span class="ot"> content=</span><span class="st">&quot;pandoc&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;title&gt;&lt;/title&gt;</span>
+  <span class="kw">&lt;style</span><span class="ot"> type=</span><span class="st">&quot;text/css&quot;</span><span class="kw">&gt;</span>code<span class="kw">{white-space:</span> <span class="dt">pre</span><span class="kw">;}&lt;/style&gt;</span>
+  <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;stylesheet&quot;</span><span class="ot"> href=</span><span class="st">&quot;../index/style.css&quot;</span><span class="ot"> type=</span><span class="st">&quot;text/css&quot;</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;</span><span class="ot"> type=</span><span class="st">&quot;text/javascript&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+<span class="kw">&lt;h1</span><span class="ot"> id=</span><span class="st">&quot;マークダウン変換テスト&quot;</span><span class="kw">&gt;</span>マークダウン変換テスト<span class="kw">&lt;/h1&gt;</span>
+<span class="kw">&lt;p&gt;</span>これはテストです.<span class="kw">&lt;/p&gt;</span>
+<span class="kw">&lt;h2</span><span class="ot"> id=</span><span class="st">&quot;数式の変換&quot;</span><span class="kw">&gt;</span>数式の変換<span class="kw">&lt;/h2&gt;</span>
+<span class="kw">&lt;p&gt;&lt;span</span><span class="ot"> class=</span><span class="st">&quot;math display&quot;</span><span class="kw">&gt;</span>\[ x^n + y^n = z^n \]<span class="kw">&lt;/span&gt;&lt;/p&gt;</span>
+<span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<p>もうこの辺でめんどくさくなってきたのでテンプレート関係は以下の参考サイトを観覧して欲しい.</p>
+<ul>
+<li><a href="https://sky-y.github.io/site-pandoc-jp/users-guide/#templates">Pandoc ユーザーズガイド 日本語版</a></li>
+<li><a href="https://qiita.com/m_ohsumi/items/cea1243e106ababd15e7">Pandocを使ってMarkdownを整形されたHTMLに変換する</a></li>
+<li><a href="https://qiita.com/TEVASAKI/items/c97815f5fb6542bbeb2c">PandocでMarkdown からHTML5へ。テンプレート指定で思った通りの書式にするラクをする(?</a></li>
+</ul>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ぐろーらいと人民共和国</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas {border: 1px solid black;}
+			input[type="input"] { width: 30px; }
+		</style>
+	</head>
+	<body>
+
+		<h1>地形生成 ダイヤモンド スクエア法</h1>
+
+		今回のは平面上の地形です. (前回(GCF)のは惑星全体)<br>
+		いつかは河川とかも生成したい.
+
+		<h2>遊び方</h2>
+
+		draw: 地図を描画する<br>
+		レンジバー: 海抜を変更<br>
+		標高の変更: 四隅の標高を変更 つまり初期状態の設定<br>
+		指数: 大きいほど滑らか, 小さいほどつぶつぶ.<br><br>
+
+		作るときに参考にした資料は<a href="https://en.wikipedia.org/wiki/Diamond-square_algorithm">こちら(英文, Wikipedia)</a><br><br>
+
+		<form name="controller">
+			<input type="button" value="draw">
+			<input type="range" value="0" min="-100" max="100">
+			海抜:
+			<input type="input" value="0">
+
+			<br><br>
+			<b>標高の変更</b><br>
+			左上:
+			<input type="input" id="upleft" value="1.0">
+			, 右上:
+			<input type="input" id="upright" value="1.0">
+			, 左下:
+			<input type="input" id="downleft" value="-1.0">
+			, 右下:
+			<input type="input" id="downright" value="1.0">
+			 | 指数:
+			<input type="input" id="index" value="1.2">
+		</form>
+
+		<canvas id="canvas" width="513" height="513"></canvas>
+		<script src="ds.js"></script>
+		
+	</body>
+</html>

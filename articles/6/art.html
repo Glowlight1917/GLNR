@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>LogData.java の ドキュメント</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">超越同盟</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>LogData.java の ドキュメント</h1>
+  <span class="date">2018.03.14</span>
+
+<p>ログファイルを出力するためのクラス&quot;LogData.java&quot;の仕様をここに記す.</p>
+<h2 id="仕様">仕様</h2>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="fu">LogData</span>(String file, <span class="dt">boolean</span> isAdd)</code></pre></div>
+<p>&quot;file&quot;でログファイルの保存先を指定する. その際, 指定したファイルが既存の場合は, &quot;isAdd&quot;で上書きをするか最終行に追加するかを選択できる.isAdd=trueなら最終行に追加する. isAdd=falseならファイル全体を上書き保存する.デフォルトでは区切り文字は&quot;反革スペース&quot;である.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>(<span class="dt">int</span> <span class="kw">... </span>array)&lt;/span&gt;</code></pre></div>
+<p>int型の数値をファイルに追加する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>(<span class="dt">double</span> <span class="kw">... </span>array)&lt;/span&gt;</code></pre></div>
+<p>double型の数値をファイルに追加する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>(String <span class="kw">... </span>str)&lt;/span&gt;</code></pre></div>
+<p>String型の文字列をファイルに追加する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>()&lt;/span&gt;</code></pre></div>
+<p>空白行をファイルに追加する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">clear</span>()&lt;/span&gt;</code></pre></div>
+<p>記録したデータを全て削除する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">setMark</span>(<span class="dt">char</span> c)&lt;/span&gt;</code></pre></div>
+<p>区切り文字を変更する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">save</span>()&lt;/span&gt;</code></pre></div>
+<p>記録したデータをファイルに出力する.このとき, データが大量にある場合, 途中でjavaの仕様でメモリ不足でエラーが発生する可能性がある. なので大量のデータを保存する場合は適時save()を実行する必要がある.</p>
+<h2 id="ソースコード">ソースコード</h2>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">package cls.gldata;</span>
+    
+<span class="kw">import java.util.ArrayList;</span>
+<span class="kw">import java.util.Arrays;</span>
+<span class="kw">import cls.glfile.*;</span>
+<span class="kw">import java.io.*;</span>
+
+<span class="kw">public</span> <span class="kw">class</span> LogData <span class="kw">implements</span> ILogData{
+    <span class="kw">private</span> ArrayList&lt;String[]&gt; data; <span class="co">//文字列配列をリストに保存</span>
+    <span class="kw">private</span> <span class="dt">char</span> mark;
+    <span class="kw">private</span> <span class="dt">int</span> cnt;
+    <span class="kw">private</span> <span class="dt">boolean</span> isAdd;
+    <span class="kw">private</span> String file = <span class="kw">null</span>;
+    
+    <span class="kw">public</span> <span class="fu">LogData</span>(){
+        <span class="fu">init</span>(<span class="kw">false</span>);
+    }
+
+    <span class="kw">public</span> <span class="fu">LogData</span>(String file){
+        <span class="fu">init</span>(<span class="kw">false</span>);
+        <span class="kw">this</span>.<span class="fu">file</span> = file;
+    }
+    
+    <span class="kw">public</span> <span class="fu">LogData</span>(<span class="dt">boolean</span> isAdd){
+        <span class="fu">init</span>(isAdd);
+    }
+    
+    <span class="kw">public</span> <span class="fu">LogData</span>(String file, <span class="dt">boolean</span> isAdd){
+        <span class="fu">init</span>(isAdd);
+        <span class="kw">this</span>.<span class="fu">file</span> = file;
+    }
+
+    <span class="kw">private</span> <span class="dt">void</span> <span class="fu">init</span>(<span class="dt">boolean</span> isAdd){
+        data = <span class="kw">new</span> ArrayList&lt;String[]&gt;();    
+        mark = &#39; &#39;;
+        cnt = <span class="dv">0</span>;
+        <span class="kw">this</span>.<span class="fu">isAdd</span> = isAdd; 
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">setIsAdd</span>(<span class="dt">boolean</span> isAdd){
+        <span class="kw">this</span>.<span class="fu">isAdd</span> = isAdd;
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>(<span class="dt">double</span>[] array){
+        String[] temp = <span class="kw">new</span> String[array.<span class="fu">length</span>];    
+
+        <span class="kw">for</span>(<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; array.<span class="fu">length</span>; i++){
+            temp[i] = Double.<span class="fu">toString</span>(array[i]);    
+        }
+
+        <span class="fu">add</span>(temp);
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>(<span class="dt">int</span>[] array){
+        String[] temp = <span class="kw">new</span> String[array.<span class="fu">length</span>];    
+
+        <span class="kw">for</span>(<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; array.<span class="fu">length</span>; i++){
+            temp[i] = Integer.<span class="fu">toString</span>(array[i]);    
+        }
+
+        <span class="fu">add</span>(temp);
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>(){
+        String[] temp = <span class="kw">new</span> String[<span class="dv">1</span>];    
+        temp[<span class="dv">0</span>] = <span class="st">&quot;&quot;</span>;
+
+        <span class="fu">add</span>(temp);
+    }
+
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">add</span>(String[] str){
+        String[] temp = Arrays.<span class="fu">copyOf</span>(str, str.<span class="fu">length</span>);
+        data.<span class="fu">add</span>(temp);    
+        cnt++;
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">clear</span>(){
+        data.<span class="fu">clear</span>();
+        cnt = <span class="dv">0</span>;
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">setMark</span>(<span class="dt">char</span> c){
+        mark = c;    
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">save</span>(){
+        <span class="kw">if</span>(file == <span class="kw">null</span>){
+            System.<span class="fu">out</span>.<span class="fu">println</span>(<span class="st">&quot;error! save file is not specified at LogData&quot;</span>);
+        }            
+
+        <span class="fu">save</span>(file);
+    }
+
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">save</span>(String file){
+        <span class="fu">save</span>(<span class="kw">new</span> File(file));    
+    }
+    
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">save</span>(File file){
+        <span class="kw">try</span>{
+            FileWriter fw = <span class="kw">new</span> FileWriter(file, isAdd);
+            BufferedWriter bw = <span class="kw">new</span> BufferedWriter(fw);
+
+            String[] temp;
+    
+            <span class="kw">for</span>(<span class="dt">int</span> j = <span class="dv">0</span> ; j &lt; data.<span class="fu">size</span>(); j++){
+                temp = data.<span class="fu">get</span>(j);
+
+                <span class="kw">for</span>(<span class="dt">int</span> i = <span class="dv">0</span> ; i &lt; temp.<span class="fu">length</span>; i++){
+                    bw.<span class="fu">write</span>(temp[i]);
+    
+                    <span class="kw">if</span>(i != temp.<span class="fu">length</span> -<span class="dv">1</span>) bw.<span class="fu">write</span>(mark);
+                }
+                bw.<span class="fu">newLine</span>();
+            }
+    
+            bw.<span class="fu">close</span>();
+            fw.<span class="fu">close</span>();
+    
+            bw = <span class="kw">null</span>;
+            fw = <span class="kw">null</span>;
+
+        }<span class="kw">catch</span>(IOException e){
+            System.<span class="fu">out</span>.<span class="fu">println</span>(e + <span class="st">&quot;at LogData save&quot;</span>);
+        }    
+    }
+}</code></pre></div>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

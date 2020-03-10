@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight,ぐろーらいと, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>共和国の自動化 その2 記事作成</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../study.html">科学アカデミー</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">宗教</a>
+	<a href="../../labnote.html">実験ノート</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>共和国の自動化 その2 記事作成</h1>
+  <span class="date">2018.03.14</span>
+
+<p>以前は, ウェブサイトの記事書くのを楽にするために記事作成スクリプトを実装していた. でもやっぱりそれでも面倒なことがいろいろあった. 例えばソースコードのハイライト. プログラミングを扱うサイトではハイライトによってコードが読みやすくなることは重要で, 何が予約語で何が関数で何が文字列・数値データなのかがひと目で分かれば, プログラムの構造を素早く理解することにもバグ予防にも役に立つわけだ. もうひとつの面倒な例は数式だ. 私のサイトは地形生成とかセルオートマトンのようなシミュレーションそしてゲーム作成などをメインにしているから, それらの作り方を紹介する上で数式は欠かせないわけだ. この2つを自分で実装するのはとても面倒.</p>
+<p>ある日, マークダウンを使えば記事作成が楽になるから使おうと決心して, マークダウンエディタ(Linuxでも動くやつ)を探していて, ついに<a href="https://remarkableapp.github.io/index.html"><strong>Remarkable</strong></a> というソフトに遭遇した. これを見た瞬間, これは神ソフトだ. 私がやりたかったことを全部できるやつだと確信した. なんとマークダウンのスクリプトをリアルタイムでプレビューしてくれるし, <strong>Mathjax</strong>にも対応しているために数式をTexのように綺麗に表示することも出来る.</p>
+<p><span class="math display">\[\sum ^{\infty} _{k=1} \frac{1}{k^2} = \frac{\pi ^2}{6}\]</span></p>
+<p>ほらこんな感じに. ちゃんと数式が綺麗に表示されるのだ. そして当然ながらコードハイライト機能<strong>highlight.js</strong>も付いている.</p>
+<div class="sourceCode"><pre class="sourceCode c"><code class="sourceCode c"><span class="ot">#include &lt;stdio.h&gt;</span>
+
+<span class="dt">int</span> main(<span class="dt">void</span>){
+    printf(<span class="st">&quot;ソビエト社会主義共和国連邦&quot;</span>);
+    <span class="kw">return</span> <span class="dv">0</span>;
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="kw">class</span> codetest{
+    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span>(String str[]){
+        System.<span class="fu">out</span>.<span class="fu">println</span>(<span class="st">&quot;技術的特異点へ前進せよ&quot;</span>);
+    }   
+}</code></pre></div>
+<p>ね? いろんな言語に対応してちゃんとハイライトしてくれる. まじで労働英雄. レーニン勲章もらってもおかしくないぐらい素晴らしいソフト.</p>
+<p>というわけで, これから私は自分のサイトの記事をRemarkableを使って作ることにした.以前作っていた記事作成スクリプトは開発中止にします. さあ, みんなもRemarkableをつかって作業効率をあげよう! 生産力拡大だ! テクノロジーへ帰依せよ! 技術的特異点へ前進せよ!</p>
+<h2 id="なんで私は今までこのようなテクノロジーを使っていなかったのか">なんで私は今までこのようなテクノロジーを使っていなかったのか</h2>
+<p>いや, なんていうかさ, Mathjaxとかhighlight.jsってWebサービスじゃん. ネットの向こうにある他人のサービスに頼るじゃん. だから向こうの都合でサービス終了とかした場合にこっちは数式とかコードをちゃんと表示できなくなる可能性があるんだよね. だから今までそういうものを使うのをためらっていたわけ. でもやっぱり便利さには替えられないので使うことを決意した.</p>
+<h2 id="記事作成の流れ">記事作成の流れ</h2>
+<ol style="list-style-type: decimal">
+<li>画像素材を作成する.</li>
+<li>Remarkableで原稿を書く.</li>
+<li>htmlに出力する.</li>
+<li>このサイトの形式に合うようにhtmlを変換する.</li>
+</ol>
+<p>これらの作業は全部私のPC上で行っている. サーバー上ではなく.</p>
+<p>実はhtml出力するときにでてくるものは, そのままじゃ共和国のスタイルに合うように変換するにはいろいろと難がある. そしてMathJaxがclaudflare版になっていないという問題もある. これをなんとかしないといけない.</p>
+<p>Remarkableは<a href="https://github.com/jamiemcg/remarkable">オープンソース</a> (MITライセンス)でしかもPythonで実装されているから, ソースコードを見ればどこをどう変えればいいのかがわかる. だから3のhtml出力の際に便利な形で出力されるようにソースコードを変えれば4の変換も比較的楽にできるのである.</p>
+<p>次回はRemarkableの挙動の変更の仕方を紹介する予定だ.</p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

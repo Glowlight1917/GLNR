@@ -1,0 +1,133 @@
+body{
+	background: #F1FFEB;
+	width: auto;
+	height: auto;
+	margin: auto;
+	line-height: 160%;
+}
+
+/* ----------header------------*/
+
+header, nav{
+	width: 100%;
+	background-color: white;
+}
+
+header{
+	height: 50px;
+	background-image: url(../pic/top.png);
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+nav{
+	display: inline-block;
+	text-align: center;
+	background-color:  #d6dbff;
+	border-bottom: 1px solid #cccccc;
+	box-shadow: 0px 1px 1px 0px #aaaaaa;
+}
+
+nav.menu a{
+	display: inline-block;
+	box-pack: justify;
+	text-align: center;
+	padding: 0.2% 35px 0.2% 35px;
+	font-size: medium;
+	font-weight: bold;
+}
+
+img.head-pic{
+	margin-top: -20px;
+	width: 1000px;
+}
+
+/* ------------article-------------- */
+
+article{
+	width: 1000px;
+	height: auto;
+	box-shadow: 1px 1px 3px 0px #aaaaaa;
+	background-color: white;
+	border: 1px solid #cccccc;
+	margin-right: auto;
+  margin-left: auto;
+	margin-top: 30px;
+	padding: 8px 8px 8px 8px;
+}
+
+article p{
+	max-width: 40em;
+	margin-left: 3em;
+}
+
+li {
+  margin-left: 3em;
+}
+
+/* ------------heading-------------- */
+
+h1, h2, h3{
+	padding: 3px 0px 3px 40px;
+	font-size: large;
+	font-weight:bold;
+	width: auto;
+}
+
+h1{
+	padding:5px 20px 5px;
+	margin: 0px 0px 20px 0px;
+	background-color: lightgreen;
+}
+
+article h2{
+	margin: 20px 0px 20px 0px;
+	border: 1px solid #a3aeff;
+	border-radius: 4px;
+	background-color: #d6dbff;
+}
+
+article h3{
+	margin: 20px 0px 10px 0px;
+	border-bottom: 3px solid #a3aeff;
+}
+
+/* ---------------image----------------- */
+
+img.pics{
+	width: 15%;
+	height: 15%;
+	border: 1px solid #cccccc;
+	box-shadow: 1px 1px 3px 0px #aaaaaa;
+	padding: 3px 3px 3px 3px;
+	margin: 3px 3px 3px 3px;
+}
+
+article img{
+	max-width: 700px;
+	margin-left: 3em;
+	border: 2px solid #cccccc;
+}
+
+p.caption{
+	margin-top: 0px;
+	font-weight: bold;
+	color: green;
+}
+
+code.hljs{
+	margin-left: 3.5em;
+	font-size: 0.9em;
+	width: 50em;
+}
+
+footer{
+	width: 100%;
+	background-color: white;
+	height: 50px;
+	margin-top: 15px;
+	padding-top: 10px;
+	display: inline-block;
+	text-align: center;
+	border-top: 1px solid #cccccc;
+}

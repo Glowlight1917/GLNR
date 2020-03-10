@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ぐろーらいと人民共和国</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas {border: 1px solid black;}
+		</style>
+	</head>
+	<body>
+
+		<h1>ラングトンの蟻</h1>
+
+		<h2>遊び方</h2>
+
+		start: シミュレーションを開始する<br>
+		stop: シミュレーションを一時停止する<br>
+		reset: 初期条件を変えてリセット<br>
+		蟻の数: 表示する蟻の匹数を設定<br><br>
+
+		ラングトンの蟻ついて詳しくは<a href="https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%B3%E3%82%B0%E3%83%88%E3%83%B3%E3%81%AE%E3%82%A2%E3%83%AA">こちら(Wikipedia)</a>へ.<br><br>
+
+		<form name="controller">
+			<input type="button" value="start">
+			<input type="button" value="stop">
+			<input type="button" value="reset">
+			蟻の数:
+			<input type="input" value="3">
+		</form>
+
+		<canvas id="canvas" width="640" height="480"></canvas>
+		<script src="langton.js"></script>
+		
+	</body>
+</html>

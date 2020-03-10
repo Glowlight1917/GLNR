@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight,ぐろーらいと, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Line.java</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../study.html">科学アカデミー</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">宗教</a>
+	<a href="../../labnote.html">実験ノート</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>Line.java</h1>
+  <span class="date">2018.03.14</span>
+
+<p>ゲームで用いる線分処理のためのクラス&quot;Line.java&quot;の仕様をここに記す.</p>
+<h2 id="仕様">仕様</h2>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> Line(<span class="dt">double</span> startX\, <span class="dt">double</span> startY\, <span class="dt">double</span> endX\, <span class="dt">double</span> endY)</code></pre></div>
+<p>このクラスのコンストラクタ. 始点(startX, startY)から終点(endX, endY)までの間に引かれる線分を生成する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">move</span>(<span class="dt">double</span> x\, <span class="dt">double</span> y)</code></pre></div>
+<p>線分を平行移動する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">rotate</span>(<span class="dt">double</span> rad)</code></pre></div>
+<p>線分を始点を中心としてrad(ラジアン度)だけ回転する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">void</span> <span class="fu">rotate</span>(<span class="dt">double</span> rad\, <span class="dt">double</span> x\, <span class="dt">double</span> y)</code></pre></div>
+<p>線分を指定した点(x, y)の周りでrad(ラジアン度)だけ回転する.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> Vector <span class="fu">coll</span>(Line line)</code></pre></div>
+<p>線分同士の交差を調べる. 線分lineが線分thisに衝突するときの交点を求めるためのパラメータを取得する. 線分thisの始点から交点までの距離, 線分lineの始点から交点までの距離をそれぞれtとsを用いて表す. 詳しくは数学的な解説を参照.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> Vector <span class="fu">coll</span>(Sprite sp\, <span class="dt">int</span> index)</code></pre></div>
+<p>スプライトと線分の衝突を判定するときに用いる.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> Vector[] <span class="fu">reflect</span>(Line line)</code></pre></div>
+<p>ボールが壁にあたった時の跳ね返りなどを表すときに使う. 線分lineを線分thisで折り返したときの, 交点と線分lineの終点の間をベクトルとして表現する. このときそのベクトルは線分thisの平行成分と垂直成分に分割される. 平行成分は&quot;滑りベクトル&quot;として, 垂直成分は&quot;法線ベクトル&quot;として扱うことが出来る. その他にも,ボールが反射した直後のボールの速度も返す. つまり, 滑りベクトル, 法線ベクトル, 速度ベクトルを返す関数である.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> Vector[] <span class="fu">reflect</span>(Sprite sp\, <span class="dt">int</span> index)</code></pre></div>
+<p>スプライトと壁の間の運動を表すときに使う. これによりブロックとの衝突処理が実装できる.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">double</span> <span class="fu">startX</span>()</code></pre></div>
+<p>線分の始点x座標を返す.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">double</span> <span class="fu">startY</span>()</code></pre></div>
+<p>線分の始点y座標を返す.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">double</span> <span class="fu">endX</span>()</code></pre></div>
+<p>線分の終点x座標を返す.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">double</span> <span class="fu">endY</span>()</code></pre></div>
+<p>線分の終点y座標を返す.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">double</span> <span class="fu">length</span>()</code></pre></div>
+<p>線分の長さを返す.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> <span class="dt">double</span> <span class="fu">angle</span>()</code></pre></div>
+<p>線分の角度を返す.</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">public</span> Vector <span class="fu">getVector</span>()</code></pre></div>
+<p>線分の始点と終点の間をベクトルとして返す.</p>
+<h2 id="ソースコード">ソースコード</h2>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">class</span> Line{
+    <span class="kw">protected</span> <span class="dt">double</span> sx, sy;
+    <span class="kw">protected</span> <span class="dt">double</span> ex, ey;
+    <span class="kw">protected</span> <span class="dt">double</span> length;
+    <span class="kw">protected</span> <span class="dt">double</span> angle;
+    <span class="kw">protected</span> <span class="dt">double</span> ax, ay; <span class="co">//方向ベクトル</span>
+    <span class="kw">protected</span> <span class="dt">double</span> hx, hy; <span class="co">//法線ベクトル</span>
+
+    <span class="kw">public</span> Line(<span class="dt">double</span> startX, <span class="dt">double</span> startY, <span class="dt">double</span> endX, <span class="dt">double</span> endY){
+        <span class="kw">this</span>.<span class="fu">sx</span> = startX; <span class="kw">this</span>.<span class="fu">sy</span> = startY;
+        <span class="kw">this</span>.<span class="fu">ex</span> = endX; <span class="kw">this</span>.<span class="fu">ey</span> = endY;
+        <span class="kw">this</span>.<span class="fu">ax</span> = (ex - sx)/length; <span class="kw">this</span>.<span class="fu">ay</span> = (ey - sy)/length;
+        <span class="kw">this</span>.<span class="fu">hx</span> = -ay; <span class="kw">this</span>.<span class="fu">hy</span> = ax;
+
+        <span class="kw">this</span>.<span class="fu">length</span> = Math.<span class="fu">sqrt</span>((ex - sx)*(ex - sx) + (ey - sy)*(ey - sy));
+    }
+
+    <span class="co">//平行移動</span>
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">move</span>(<span class="dt">double</span> x, <span class="dt">double</span> y){
+        <span class="kw">this</span>.<span class="fu">sx</span> += x;
+        <span class="kw">this</span>.<span class="fu">sy</span> += y;
+        <span class="kw">this</span>.<span class="fu">ex</span> += x;
+        <span class="kw">this</span>.<span class="fu">ey</span> += y;
+    }
+
+    <span class="co">//始点を中心に回転</span>
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">rotate</span>(<span class="dt">double</span> rad){
+        <span class="dt">double</span> tx = <span class="kw">this</span>.<span class="fu">ex</span>;
+        <span class="dt">double</span> ty = <span class="kw">this</span>.<span class="fu">ey</span>;
+
+        <span class="kw">this</span>.<span class="fu">ex</span> = (tx - sx)*Math.<span class="fu">cos</span>(rad) - (ty - sy)*Math.<span class="fu">sin</span>(rad) + sx;
+        <span class="kw">this</span>.<span class="fu">ey</span> = (tx - sx)*Math.<span class="fu">sin</span>(rad) + (ty - sy)*Math.<span class="fu">cos</span>(rad) + sy;
+    }
+
+    <span class="co">//指定した点を中心に回転</span>
+    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">rotate</span>(<span class="dt">double</span> rad, <span class="dt">double</span> x, <span class="dt">double</span> y){
+        <span class="dt">double</span> tx = <span class="kw">this</span>.<span class="fu">sx</span>;
+        <span class="dt">double</span> ty = <span class="kw">this</span>.<span class="fu">sy</span>;
+        <span class="kw">this</span>.<span class="fu">sx</span> = (tx - x)*Math.<span class="fu">cos</span>(rad) - (ty - y)*Math.<span class="fu">sin</span>(rad) + x;
+        <span class="kw">this</span>.<span class="fu">sy</span> = (tx - x)*Math.<span class="fu">sin</span>(rad) + (ty - y)*Math.<span class="fu">cos</span>(rad) + y;
+
+        tx = <span class="kw">this</span>.<span class="fu">ex</span>;
+        ty = <span class="kw">this</span>.<span class="fu">ey</span>;
+        <span class="kw">this</span>.<span class="fu">ex</span> = (tx - x)*Math.<span class="fu">cos</span>(rad) - (ty - y)*Math.<span class="fu">sin</span>(rad) + x;
+        <span class="kw">this</span>.<span class="fu">ey</span> = (tx - x)*Math.<span class="fu">sin</span>(rad) + (ty - y)*Math.<span class="fu">cos</span>(rad) + y;
+    }
+
+    <span class="co">//線分同士の交差判定</span>
+    <span class="kw">public</span> <span class="dt">boolean</span> <span class="fu">isCross</span>(<span class="dt">double</span> lsx, <span class="dt">double</span> lsy, <span class="dt">double</span> lex, <span class="dt">double</span> ley){
+        Vector v = <span class="kw">new</span> Vector(lex- lsx, ley - lsy);
+        Line l1 = <span class="kw">new</span> Line(lsx, lsy, sx, sy);
+        Line l2 = <span class="kw">new</span> Line(lex, ley, ex, ey);
+
+        <span class="kw">if</span>(l1.<span class="fu">normal</span>().<span class="fu">dot</span>(v) &gt;= <span class="fl">0.0</span>) <span class="kw">return</span> <span class="kw">false</span>;
+        <span class="kw">if</span>(l2.<span class="fu">normal</span>().<span class="fu">dot</span>(v) &lt;= <span class="fl">0.0</span>) <span class="kw">return</span> <span class="kw">false</span>;
+        <span class="kw">if</span>(<span class="fu">normal</span>().<span class="fu">dot</span>(l1.<span class="fu">getVector</span>()) * <span class="fu">normal</span>().<span class="fu">dot</span>(l2.<span class="fu">getVector</span>()) &gt; <span class="fl">0.0</span>) <span class="kw">return</span> <span class="kw">false</span>;
+
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+
+    <span class="kw">public</span> <span class="dt">boolean</span> <span class="fu">isCross</span>(Line line){
+        <span class="kw">return</span> <span class="fu">isCross</span>(line.<span class="fu">sx</span>, line.<span class="fu">sy</span>, line.<span class="fu">ex</span>, line.<span class="fu">ey</span>);
+    }
+
+    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">dist</span>(<span class="dt">double</span> x, <span class="dt">double</span> y){ <span class="kw">return</span> Math.<span class="fu">abs</span>(av.<span class="fu">get</span>(<span class="dv">1</span>)*(x - sx) - av.<span class="fu">get</span>(<span class="dv">0</span>)*(y - sy)); } <span class="co">//点と直線の距離取得</span>
+    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">dotDir</span>(<span class="dt">double</span> x, <span class="dt">double</span> y){ <span class="kw">return</span> av.<span class="fu">get</span>(<span class="dv">0</span>) * x + av.<span class="fu">get</span>(<span class="dv">1</span>) * y; }
+    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">dotNor</span>(<span class="dt">double</span> x, <span class="dt">double</span> y){ <span class="kw">return</span> hv.<span class="fu">get</span>(<span class="dv">0</span>) * x + hv.<span class="fu">get</span>(<span class="dv">1</span>) * y; }
+
+    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">length</span>(){ <span class="kw">return</span> length; }
+    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">angle</span>(){ 
+        <span class="dt">double</span> tx = ex - sx, ty = ey - sy; 
+        <span class="kw">if</span>(ty &gt; <span class="dv">0</span>) <span class="kw">return</span> Math.<span class="fu">acos</span>(tx / length);   
+
+        <span class="kw">return</span> <span class="dv">2</span>*Math.<span class="fu">PI</span> - Math.<span class="fu">acos</span>(tx / length);  
+    }
+}</code></pre></div>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

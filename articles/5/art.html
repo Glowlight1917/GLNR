@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Gimpで地形生成をしよう! その1</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">超越同盟</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>Gimpで地形生成をしよう! その1</h1>
+  <span class="date">2018.03.14</span>
+
+<p>木曜日, 08. 3月 2018 07:59 午後</p>
+<p>私が絵を描くときによく使っているのはGimpである. ロゴのようななめならかでシンプルな図形を描くときはInkscapeを使っている. どちらもLinuxでも動くオープンソースなソフトウェアだ.</p>
+<p>自動で地形生成をするときは大抵の場合, プログラミングをすることが必要になる. それができるひとならあまり問題は無いかもしれないが, 苦手な人にとっては敷居が高くなるし, プログラムを書くこと自体が多くの人にとっては面倒なことだろう. それに地形生成のようなプログラムは数学や物理学の知識が必要になることが多いのでそれらが苦手な人にとってはなかなか手を出しにくい.</p>
+<p>だから, Gimpのような既存のソフトを使って自然科学の知識があまり無くても誰でも簡単にそれなりの地形を作ることができるようになるのは, 全人類にとっての大きな進歩となる. 誰でも簡単に何かを出来るようになる. これがテクノロジーの, 文明の進歩なのである.</p>
+<p>では早速Gimpで地形を生成していこう!</p>
+<h2 id="必要な機能">必要な機能</h2>
+<p>今回使うGimpの機能のメインはフィルターと領域選択である. 使う機能をリストにまとめると以下のようになる. 書き始める前にどこにその機能があるのかを確認しておこう.</p>
+<p><strong>フィルター</strong></p>
+<ol style="list-style-type: decimal">
+<li>霧 : <em>フィルター &gt; 下塗り &gt; 雲 &gt; 霧</em></li>
+<li>バンプマップ: <em>フィルター &gt; バンプマップ</em></li>
+</ol>
+<p><strong>ツールボックス</strong></p>
+<ol style="list-style-type: decimal">
+<li>ブラシで描画: 筆アイコン</li>
+<li>消しゴム</li>
+<li>色域を洗濯: 信号機みたいなアイコン</li>
+<li>ぼかし/シャープ: 水滴アイコン</li>
+</ol>
+<p><strong>領域選択</strong></p>
+<ol style="list-style-type: decimal">
+<li>領域を反転</li>
+<li>領域を縮小 or 領域を拡大</li>
+</ol>
+<h2 id="陸地の生成">陸地の生成</h2>
+<h3 id="標高データとなる霧画像の作成">標高データとなる霧画像の作成</h3>
+<p>まず手始めに青く塗った背景画像を用意しよう. <img src="Kazam_screenshot_00002.png" /></p>
+<p>この次はフィルターで<strong>霧</strong>を作成する. 設定は</p>
+<ul>
+<li>霧の深さ: 1.0</li>
+<li>不透明度: 100</li>
+</ul>
+<p>を使う. この次に<strong>ぼかし/シャープ</strong>ツールを使って霧全体をぼかす. この作業をすることによって大陸の形が細か過ぎて粉っぽくなるのを防いでくれるのである.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00005.png" />
+
+</div>
+<p>生成してぼやかした<strong>霧画像はレイヤーのコピーを使って保存しておくこと.</strong>この霧画像が地形の標高データとなっているので, 山地を作ったり, 浅瀬の海底を作ったりに使えるのである.</p>
+<h3 id="大陸の生成">大陸の生成</h3>
+<p>その次は<strong>色域選択ツール</strong>を使って<strong>白いところ</strong>をクリックする. そしてそのまま左右にドラッグすると閾値の数値を細かく上下することが出来る. このとき色域選択ツールの設定で<strong>なめらかに</strong>と<strong>境界をぼかす</strong>を外すこと. 設定は下の画像参照.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00007.png" />
+
+</div>
+<p>その後は選択領域を緑系の色で塗って大陸を描き, <strong>選択範囲を反転</strong>した後に消しゴムで霧を消して海を描く. 次に同じようにまた<strong>反転</strong>して 今度は<strong>選択領域を縮小する(設定は1px)</strong>を実行して少し明るめの緑で大陸を塗る.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00012.png" />
+
+</div>
+<p>これらの作業をすることでなかなか本格的な大陸を作ることが出来るのだ.</p>
+<h3 id="山の生成">山の生成</h3>
+<p>次は山にする部分の領域を選択するために, 以前保存しておいた霧のコピーを使う. 霧を色域選択ツールを使って大陸よりも少し狭い領域を選択しよう. こうすることによって海岸沿いに平野を作ることが出来る.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00014.png" />
+
+</div>
+<p>その後は, 編集対象のレイヤーを大陸の方に戻してからフィルターの<strong>バンプマップ</strong>を選択しよう. バンプマップ機能を使うとあるレイヤーに別のレイヤーの画像を写像することができる. 細かい設定は画像参照.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00015.png" />
+
+</div>
+<p>そして, 一旦霧のレイヤーを不可視にして<strong>選択領域をそのまま維持</strong>しながら少し濃い緑で選択領域を塗る.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00017.png" />
+
+</div>
+<p>これで大陸の部分は完成となる.</p>
+<h2 id="海の生成">海の生成</h2>
+<p>これでやっと大陸が描けたわけだから, 次は大陸周辺の浅瀬を描いてみよう. 例によって霧レイヤーを色域選択ツールで大陸よりも広い領域を選択する.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00019.png" />
+
+</div>
+<p>そのあとは, 領域反転を使って水深が深いところを消しゴムで消し, 浅瀬は 透明な青色で何回か塗りつぶして描く.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00021.png" />
+
+</div>
+<p>これで地形自体は完成となる. ここで雲も描きたいなーと思ったら次に進もう.</p>
+<h2 id="雲の生成">雲の生成</h2>
+<p>これはフィルターの霧ツールで作ることが出来る. ただしこのときは<strong>霧の震度を2.0</strong>にしよう.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00024.png" />
+
+</div>
+<p>また色域選択ツールを使ってちょうどいい感じに雲を作る.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00026.png" />
+
+</div>
+<p>そのあとは雲を<strong>ぼかしツール</strong>でなぞって完成となる.</p>
+<div class="figure">
+<img src="Kazam_screenshot_00029.png" />
+
+</div>
+<p><strong>これが完成系の地形!!!</strong></p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>

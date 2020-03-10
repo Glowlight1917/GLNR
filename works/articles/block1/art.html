@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="keywords" content="ゲーム開発,linux,ソ連,glowlight,ぐろーらいと, ぐろーらいと人民共和国, 超越同盟, 技術的特異点"/>
+  <meta name="description" content="プログラミング備忘録, ゲーム・ツール公開, 超越同盟公式サイト"/>
+  <meta name="author" content="Glowlight"/>
+  <meta name="generator" content="pandoc"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>第1回:GUIの基礎の基礎ーウィンドウの表示をしよう!</title>
+
+  <style type="text/css">code{white-space: pre;}</style>
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css"/>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <link rel="stylesheet" href="../article_style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <header></header>
+  <nav class="menu">
+    <a href="../../index.html">トップ</a>
+	<a href="../../study.html">科学アカデミー</a>
+	<a href="../../works.html">作品</a>
+	<a href="../../religion.html">宗教</a>
+	<a href="../../labnote.html">実験ノート</a>
+	<a href="https://www.reddit.com/r/GLJK_BLOG/">ブログ</a>
+  </nav>
+  <article>
+  <h1>第1回:GUIの基礎の基礎ーウィンドウの表示をしよう!</h1>
+  <span class="date">2018.03.14</span>
+
+<p>プログラミングは端末に文字列を表示させるだけではない. プログラミングをすることによりゲームだって作れるのだ. でもどうやって? ウィンドウや画像, 音楽を表示させる機能を使えばいい. 多くのプログラミング言語ではそのような ことをするのに追加でライブラリを入れるなど少し面倒な作業をしなければならない. でもJavaなら最初からそういう 機能が付属しているので大丈夫.</p>
+<p>ただし, GUIを扱うプログラムは今までも文字列を扱う(CUI)ものと書き方が多少異なるので. そこは覚悟しなくてはならない. だけど, 簡単な例を通して実際にプログラムを作っていけば, GUI向けのJavaの書き方にすぐ慣れるだろう.</p>
+<p>ということで, 今回はゲーム開発初回なので典型的な「ブロック崩しゲーム」を作っていこうと思う. 実は私はjavaでまともなゲームを作ったことはない. 他の言語ではあるけど. なのでこの記事を作りながら ゲーム作成法を学んでいこうと思う. この記事はゲーム開発日誌として読んで欲しい.</p>
+<h2 id="方針">方針</h2>
+<blockquote>
+<p>ウィンドウを表示できるようになる.</p>
+</blockquote>
+<p>というわけで，早速ソースコードを見てみよう! 今回はいきなり3つのソースファイルがあるけど, 短いから安心してくれたまえ.</p>
+<h2 id="ソースコード">ソースコード</h2>
+<p>Main.java: ゲームを起動させるためのメインクラス <sub><del>java public class Main{ static public void main(String str[]){ GameMain test = new GameMain();<br />
+} }</del></sub></p>
+<p>GameMain.java: ゲームウィンドウを作るためのクラス ブラウザ本体のようなもの <sub>~</sub>java import java.awt.<em>; import java.awt.event.</em>; import javax.swing.<em>; import javax.swing.event.</em>; import java.io.*;</p>
+<p>public class GameMain extends JFrame{ private GameSequence sequence; public GameMain(){</p>
+<pre><code>    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setLocationRelativeTo(null);
+    sequence = new GameSequence();
+    add(sequence);
+    pack();
+    setResizable(false);
+    setVisible(true);
+}
+public static void main(String str[]){
+    new GameMain();        
+}</code></pre>
+<p>} <sub>~</sub></p>
+<p>GameSequence.java: シーケンス(紙芝居の1シーン)のクラス ブラウザのタブみたいなもの <sub>~</sub>java import java.awt.<em>; import java.awt.event.</em>; import javax.swing.<em>; import javax.swing.event.</em>; import java.io.*;</p>
+<p>//GameSystem public class GameSequence extends JPanel{ public GameSequence(){ setPreferredSize(new Dimension(640, 480)); setBackground(Color.BLACK); } } <sub>~</sub></p>
+<h2 id="解説">解説</h2>
+<p>今回は3つのクラスを紹介する. 2つ目と3つ目は多分わけがわからないと思うが, GUIプログラミングをするための便利なおまじないだと思ってよい. プログラミング自体を初めたとき&quot;HelloWorld!&quot;プログラムを作った時のように.</p>
+<p>最初のMain.javaはゲームを実行するためのクラスである. まず, この3つのソースファイルを同一のディレクトリに保存して以下のコマンドを入力してみよう!</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">java</span> Main</code></pre></div>
+<p>すると, 黒い画面が出てくるはず.</p>
+<div class="figure">
+<img src="block1_1.png" alt="表示される画面" />
+<p class="caption">表示される画面</p>
+</div>
+<p>この黒い画面を表示することがGUIプログラミングの小さいが大きな一歩なのである.</p>
+<p>次に, GameSequnece.java内の</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="fu">setBackground</span>(Color.<span class="fu">BLACK</span>);</code></pre></div>
+<p>の部分を</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="fu">setBackground</span>(Color.<span class="fu">RED</span>);</code></pre></div>
+<p>に変えてみよう! これをコンパイルして実行すると革命的で力強いウィンドウが出てくるはずだ.</p>
+<div class="figure">
+<img src="block1_2.png" alt="プロレタリアウィンドウ" />
+<p class="caption">プロレタリアウィンドウ</p>
+</div>
+<p>さらに,</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="fu">setPreferredSize</span>(<span class="kw">new</span> Dimension(<span class="dv">640</span>\, <span class="dv">480</span>));</code></pre></div>
+<p>の数値を変更するとウィンドウの大きさを変えることができる.こんな感じで自分でいろいろ書き換えてみて実験をすることはプログラミング上達の大切な試みなので是非是非積極的に実験してみて欲しい.</p>
+
+  </article>
+  <footer>
+	2014 glowlight.info <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a>
+  </footer>
+</body>
+</html>
